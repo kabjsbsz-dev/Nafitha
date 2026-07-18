@@ -153,7 +153,7 @@ html+=`
 
 <div class="post">
 
-${post.image?`<img src="${post.image}">`:""}
+${post.image?`<img src="${post.image}" class="post-image" onclick="openImage('${post.image}')">`:""}
 
 <div class="post-info">
 
@@ -264,3 +264,32 @@ document.getElementById("search").addEventListener("keyup",loadPosts);
 }
 
 };
+
+function openImage(src){
+
+let viewer=document.createElement("div");
+viewer.className="image-viewer";
+
+viewer.innerHTML=`
+<span class="close-viewer">&times;</span>
+
+<img src="${src}" id="zoomImage">
+
+<a href="${src}" download class="download-btn">
+تحميل الصورة
+</a>
+`;
+
+document.body.appendChild(viewer);
+
+viewer.querySelector(".close-viewer").onclick=function(){
+viewer.remove();
+};
+
+viewer.onclick=function(e){
+if(e.target===viewer){
+viewer.remove();
+}
+};
+
+}
