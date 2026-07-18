@@ -293,3 +293,31 @@ viewer.remove();
 };
 
 }
+
+function openImage(src){
+
+let viewer=document.createElement("div");
+
+viewer.className="image-viewer";
+
+viewer.innerHTML=`
+<span class="close-viewer">&times;</span>
+<img src="${src}" class="viewer-img">
+<a href="${src}" download class="download-btn">
+تحميل الصورة
+</a>
+`;
+
+document.body.appendChild(viewer);
+
+viewer.querySelector(".close-viewer").onclick=function(){
+viewer.remove();
+};
+
+viewer.onclick=function(e){
+if(e.target===viewer){
+viewer.remove();
+}
+};
+
+}
