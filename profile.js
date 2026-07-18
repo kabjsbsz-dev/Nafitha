@@ -214,9 +214,230 @@ function loadUserFavorites() {
     alert("سيتم إضافة المفضلة قريباً");
 }
 
+// =============================================
+// ===== نظام المتابعة (كامل) =====
+// =============================================
+
 function toggleFollow() {
-    alert("سيتم إضافة المتابعة قريباً");
+    if (!auth.currentUser) {
+        alert("يرجى تسجيل الدخول");
+        return;
+    }
+
+    let btn = document.getElementById("followBtn");
+    let urlParams = new URLSearchParams(window.location.search);
+    let targetUid = urlParams.get("uid") || auth.currentUser.uid;
+
+    if (btn.innerText.includes("متابعة")) {
+        followUser(targetUid);
+        btn.innerText = "❌ إلغاء المتابعة";
+        btn.style.background = "rgba(255,255,255,0.1)";
+        btn.style.color = "#fff";
+    } else {
+        unfollowUser(targetUid);
+        btn.innerText = "➕ متابعة";
+        btn.style.background = "rgba(255,215,0,0.2)";
+        btn.style.color = "#FFD700";
+    }
 }
+
+function followUser(targetUid) {
+    if (!auth.currentUser) return;
+    let uid = auth.currentUser.uid;
+    if (uid === targetUid) return;
+
+    // إضافة المستخدم إلى قائمة المتابعين
+    db.collection("users").doc(targetUid).update({
+        followers: firebase.firestore.FieldValue.arrayUnion(uid)
+    });
+
+    // إضافة إلى قائمة من تتابعهم
+    db.collection("users").doc(uid).update({
+        following: firebase.firestore.FieldValue.arrayUnion(targetUid)
+    }).then(function() {
+        // إرسال إشعار
+        db.collection("users").doc(uid).get().then(function(userDoc) {
+            let name = userDoc.data()?.name || "مستخدم";
+            sendNotification(targetUid, "follow", `${name} بدأ متابعتك`, "/profile?uid=" + uid);
+        });
+        // تحديث عدد المتابعين
+        updateFollowCounts(targetUid);
+    });
+}
+
+function unfollowUser(targetUid) {
+    if (!auth.currentUser) return;
+    let uid = auth.currentUser.uid;
+
+    db.collection("users").doc(targetUid).update({
+        followers: firebase.firestore.FieldValue.arrayRemove(uid)
+    });
+
+    db.collection("users").doc(uid).update({
+        following: firebase.firestore.FieldValue.arrayRemove(targetUid)
+    }).then(function() {
+        updateFollowCounts(targetUid);
+    });
+}
+
+function updateFollowCounts(uid) {
+    db.collection("users").doc(uid).get().then(function(doc) {
+        if (doc.exists) {
+            let data = doc.data();
+            let followers = data.followers || [];
+            document.getElementById("followersCount").innerText = followers.length;
+        }
+    });
+}
+
+// =============================================
+// ===== عرض المتابعين والمتابعات =====
+// =============================================
+
+function showFollowers() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let uid = urlParams.get("uid") || auth.currentUser.uid;
+
+    db.collection("users").doc(uid).get().then(function(doc) {
+        let data = doc.data() || {};
+        let followers = data.followers || [];
+        let names = [];
+
+        if (followers.length === 0) {
+            alert("👥 لا يوجد متابعون");
+            return;
+        }
+
+        // جلب أسماء المتابعين
+        let count = 0;
+        followers.forEach(function(followerUid) {
+            db.collection("users").doc(followerUid).get().then(function(userDoc) {
+                if (userDoc.exists) {
+                    let userData = userDoc.data();
+                    names.push(userData.name || "مستخدم");
+                }
+                count++;
+                if (count === followers.length) {
+                    alert("👥 المتابعون:\n" + names.join("\n"));
+                }
+            });
+        });
+    });
+}
+
+function showFollowing() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let uid = urlParams.get("uid") || auth.currentUser.uid;
+
+    db.collection("users").doc(uid).get().then(function(doc) {
+        let data = doc.data() || {};
+        let following = data.following || [];
+        let names = [];
+
+        if (following.length === 0) {
+            alert("👥 لا يتابع أحد");
+            return;
+        }
+
+        let count = 0;
+        following.forEach(function(followUid) {
+            db.collection("users").doc(followUid).get().then(function(userDoc) {
+                if (userDoc.exists) {
+                    let userData = userDoc.data();
+                    names.push(userData.name || "مستخدم");
+                }
+                count++;
+                if (count === following.length) {
+                    alert("👥 يتابع:\n" + names.join("\n"));
+                }
+            });
+        });
+    });
+}
+
+// =============================================
+// ===== تغيير الغلاف =====
+// =============================================
+
+function changeCover() {
+    if (!auth.currentUser) {
+        alert("يرجى تسجيل الدخول");
+        return;
+    }
+
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = function() {
+        let file = this.files[0];
+        if (!file) return;
+
+        let formData = new FormData();
+        formData.append("image", file);
+
+        fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
+            method: "POST",
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                let url = data.data.url;
+                db.collection("users").doc(auth.currentUser.uid).update({ cover: url })
+                    .then(function() {
+                        document.getElementById("coverImage").src = url;
+                        alert("✅ تم تغيير الغلاف");
+                    });
+            } else {
+                alert("فشل رفع الصورة");
+            }
+        })
+        .catch(function() {
+            alert("حدث خطأ");
+        });
+    };
+    input.click();
+}
+
+// =============================================
+// ===== تغيير صورة البروفايل =====
+// =============================================
+
+document.getElementById("profileUpload").onchange = function() {
+    if (!auth.currentUser) {
+        alert("يرجى تسجيل الدخول");
+        return;
+    }
+
+    let file = this.files[0];
+    if (!file) return;
+
+    let formData = new FormData();
+    formData.append("image", file);
+
+    fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
+        method: "POST",
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            let image = data.data.url;
+            db.collection("users").doc(auth.currentUser.uid).update({
+                image: image,
+                profileImage: image
+            }).then(function() {
+                document.getElementById("profileImage").src = image;
+                alert("✅ تم تغيير صورة الحساب");
+            });
+        } else {
+            alert("فشل رفع الصورة");
+        }
+    })
+    .catch(function() {
+        alert("حدث خطأ أثناء رفع الصورة");
+    });
+};
 
 function showFollowers() {
     alert("سيتم عرض المتابعين قريباً");
