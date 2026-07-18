@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>الرسائل</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">💬 الرسائل</div>
+
+<button class="login" onclick="window.location='index.html'">
+🏠 الرئيسية
+</button>
+
+</header>
+
+<div class="container">
+
+<main style="width:100%;">
+
+<div class="post">
+
+<div class="post-body">
+
+<h2>الدردشة</h2>
+
+<div id="chatBox" style="height:350px;overflow:auto;border:1px solid #ddd;padding:10px;border-radius:10px;margin:15px 0;"></div>
+
+<input type="text" id="message" placeholder="اكتب رسالتك...">
+
+<button onclick="sendMessage()">
+
+إرسال
+
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<script>
+
+function loadMessages(){
+
+let messages=JSON.parse(localStorage.getItem("messages"))||[];
+
+let html="";
+
+messages.forEach(function(msg){
+
+html+=`
+<p style="background:#1877f2;color:#fff;padding:10px;border-radius:10px;margin:5px 0;">
+${msg}
+</p>
+`;
+
+});
+
+document.getElementById("chatBox").innerHTML=html;
+
+}
+
+function sendMessage(){
+
+let message=document.getElementById("message").value;
+
+if(message=="") return;
+
+let messages=JSON.parse(localStorage.getItem("messages"))||[];
+
+messages.push(message);
+
+localStorage.setItem("messages",JSON.stringify(messages));
+
+document.getElementById("message").value="";
+
+loadMessages();
+
+}
+
+window.onload=loadMessages;
+
+</script>
+
+</body>
+
+</html>

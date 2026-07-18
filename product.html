@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>تفاصيل المنتج</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">🪟 نافذة</div>
+
+<button class="login" onclick="window.location='index.html'">
+🏠 الرئيسية
+</button>
+
+</header>
+
+<main style="padding:20px;">
+
+<div class="post">
+
+<div id="productImages"></div>
+
+<div class="post-body">
+
+<h2 id="productName"></h2>
+
+<p id="factoryName"></p>
+
+<p id="location"></p>
+
+<p id="description"></p>
+
+<h3 id="price"></h3>
+
+<p id="phone"></p>
+
+<div class="actions">
+
+<button id="callBtn">
+📞 اتصال
+</button>
+
+<button id="whatsappBtn">
+💬 واتساب
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+let index=localStorage.getItem("selectedPost");
+
+let posts=JSON.parse(localStorage.getItem("posts"))||[];
+
+if(posts[index]){
+
+let p=posts[index];
+
+document.getElementById("productName").innerHTML=p.product;
+
+document.getElementById("factoryName").innerHTML="🏭 "+p.factory;
+
+document.getElementById("location").innerHTML="📍 "+p.location;
+
+document.getElementById("description").innerHTML=p.description;
+
+document.getElementById("price").innerHTML="💰 "+p.price+" دينار";
+
+document.getElementById("phone").innerHTML="📞 "+p.phone;
+
+document.getElementById("callBtn").onclick=function(){
+
+window.location.href="tel:"+p.phone;
+
+}
+
+document.getElementById("whatsappBtn").onclick=function(){
+
+window.open("https://wa.me/"+p.phone);
+
+}
+
+let imgs="";
+
+p.images.forEach(function(img){
+
+imgs+=`<img src="${img}" style="width:100%;margin-bottom:10px;border-radius:10px;">`;
+
+});
+
+document.getElementById("productImages").innerHTML=imgs;
+
+}
+
+</script>
+
+</body>
+
+</html>

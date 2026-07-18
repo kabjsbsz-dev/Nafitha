@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>التقييمات</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">⭐ تقييمات المعامل</div>
+
+<button class="login" onclick="window.location='index.html'">
+🏠 الرئيسية
+</button>
+
+</header>
+
+<main style="padding:20px;">
+
+<div class="post">
+
+<div class="post-body">
+
+<h2>أضف تقييمك</h2>
+
+<input type="text" id="user" placeholder="اسمك">
+
+<select id="rate">
+
+<option value="5">⭐⭐⭐⭐⭐</option>
+
+<option value="4">⭐⭐⭐⭐</option>
+
+<option value="3">⭐⭐⭐</option>
+
+<option value="2">⭐⭐</option>
+
+<option value="1">⭐</option>
+
+</select>
+
+<textarea id="comment" placeholder="اكتب تعليقك" style="width:100%;height:120px;"></textarea>
+
+<button onclick="addRate()">
+
+إرسال التقييم
+
+</button>
+
+</div>
+
+</div>
+
+<div id="rates"></div>
+
+</main>
+
+<script>
+
+function loadRates(){
+
+let rates=JSON.parse(localStorage.getItem("rates"))||[];
+
+let html="";
+
+rates.forEach(function(r){
+
+html+=`
+
+<div class="post">
+
+<div class="post-body">
+
+<h3>${r.user}</h3>
+
+<p>${"⭐".repeat(parseInt(r.rate))}</p>
+
+<p>${r.comment}</p>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+document.getElementById("rates").innerHTML=html;
+
+}
+
+function addRate(){
+
+let user=document.getElementById("user").value;
+
+let rate=document.getElementById("rate").value;
+
+let comment=document.getElementById("comment").value;
+
+if(user==""||comment==""){
+
+alert("املأ جميع الحقول");
+
+return;
+
+}
+
+let rates=JSON.parse(localStorage.getItem("rates"))||[];
+
+rates.unshift({
+
+user:user,
+
+rate:rate,
+
+comment:comment
+
+});
+
+localStorage.setItem("rates",JSON.stringify(rates));
+
+document.getElementById("user").value="";
+
+document.getElementById("comment").value="";
+
+loadRates();
+
+}
+
+window.onload=loadRates;
+
+</script>
+
+</body>
+
+</html>

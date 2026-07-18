@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>نافذة</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+
+<script src="firebase.js"></script>
+
+</head>
+
+<body>
+
+<header class="topbar">
+
+<div class="logo">
+
+<img src="images/logo.png" class="top-logo">
+
+<span>نافذة</span>
+
+</div>
+
+<div class="top-right">
+
+<button onclick="window.location='profile.html'">👤</button>
+
+<button id="notifyBtn">🔔</button>
+
+</div>
+
+</header>
+
+<div class="search-box">
+
+<input
+type="text"
+id="search"
+placeholder="ابحث عن معمل أو منتج أو محافظة">
+
+</div>
+
+<div class="categories">
+
+<button>🚪 أبواب</button>
+
+<button>🪟 شبابيك</button>
+
+<button>🏢 واجهات</button>
+
+<button>🍽 مطابخ</button>
+
+<button>🧱 كلادنك</button>
+
+<button>🪜 سلالم</button>
+
+</div>
+
+<div class="new-post">
+
+<button onclick="showForm()">
+
+➕ إضافة منشور جديد
+
+</button>
+
+</div>
+
+<div id="posts"></div>
+
+<div class="popup" id="popup">
+
+<div class="form">
+
+<h2>إضافة منشور</h2>
+
+<input id="factory" placeholder="اسم المعمل">
+
+<input id="owner" placeholder="اسم صاحب المعمل">
+
+<input id="product" placeholder="اسم المنتج">
+
+<input id="price" placeholder="السعر">
+
+<input id="phone" placeholder="رقم الهاتف">
+
+<input id="city" placeholder="المحافظة">
+
+<input id="location" placeholder="العنوان">
+
+<textarea id="description" placeholder="اكتب تفاصيل المنتج"></textarea>
+
+<input type="file" id="image" accept="image/*">
+
+<button class="mainBtn" onclick="addPost()">
+
+نشر المنشور
+
+</button>
+
+<button class="createBtn" onclick="closeForm()">
+
+إلغاء
+
+</button>
+
+</div>
+
+</div>
+
+<nav class="bottom-nav">
+
+<button onclick="window.location='home.html'">
+
+🏠
+
+</button>
+
+<button onclick="window.location='favorites.html'">
+
+⭐
+
+</button>
+
+<button onclick="showForm()">
+
+➕
+
+</button>
+
+<button onclick="window.location='notifications.html'">
+
+🔔
+
+</button>
+
+<button onclick="window.location='profile.html'">
+
+👤
+
+</button>
+
+</nav>
+
+<script src="app.js"></script>
+
+<script>
+
+document.getElementById("search").addEventListener("input",function(){
+
+loadPosts();
+
+});
+
+</script>
+</body>
+
+</html>

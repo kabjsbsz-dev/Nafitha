@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>الملف الشخصي</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+
+<script src="firebase.js"></script>
+
+</head>
+
+<body>
+
+<div class="profile-cover"></div>
+
+<div class="profile-box">
+
+<img id="profileImage" src="images/logo.png" class="profile-img">
+
+<h2 id="userName">...</h2>
+
+<p id="factoryName">اسم المعمل</p>
+
+<p id="userPhone">📞</p>
+
+<p id="userCity">📍</p>
+
+<p id="userBirth">🎂</p>
+
+<div class="profile-buttons">
+
+<button class="follow-btn" onclick="editProfile()">
+
+✏️ تعديل الملف
+
+</button>
+
+<button class="message-btn" onclick="window.location='home.html'">
+
+🏠 الرئيسية
+
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>منشوراتي</h3>
+
+<div id="myPosts"></div>
+
+</div>
+
+<script src="profile.js"></script>
+
+</body>
+
+</html>

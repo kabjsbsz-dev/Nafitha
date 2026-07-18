@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>نافذة | تسجيل الدخول</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+
+</head>
+
+<body class="login-page">
+
+<div class="login-container">
+
+<div class="login-logo">
+
+<img src="images/logo.png" alt="نافذة">
+
+<h1>نافذة</h1>
+
+<p>منصة الألمنيوم والـ PVC الأولى</p>
+
+</div>
+
+<div class="login-card">
+
+<h2>تسجيل الدخول</h2>
+
+<input type="email"
+id="email"
+placeholder="البريد الإلكتروني">
+
+<div class="password-box">
+
+<input
+type="password"
+id="password"
+placeholder="كلمة المرور">
+
+<button
+type="button"
+id="showPass">
+👁
+</button>
+
+</div>
+
+<button
+class="mainBtn"
+onclick="login()">
+
+تسجيل الدخول
+
+</button>
+
+<button
+class="googleBtn">
+
+🟢 تسجيل الدخول بواسطة Google
+
+</button>
+
+<div class="login-links">
+
+<a href="#" onclick="resetPassword()">
+
+نسيت كلمة المرور؟
+
+</a>
+
+</div>
+
+<hr>
+
+<button
+class="createBtn"
+onclick="window.location='register.html'">
+
+إنشاء حساب جديد
+
+</button>
+
+</div>
+
+</div>
+<script src="firebase.js"></script>
+
+<script>
+firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+        window.location.replace("home.html");
+    }
+});
+</script>
+<script src="login.js"></script>
+
+<script>
+
+document.getElementById("showPass").onclick=function(){
+
+let pass=document.getElementById("password");
+
+if(pass.type=="password"){
+
+pass.type="text";
+
+this.innerHTML="🙈";
+
+}else{
+
+pass.type="password";
+
+this.innerHTML="👁";
+
+}
+
+};
+
+function resetPassword(){
+
+let email=document.getElementById("email").value.trim();
+
+if(email==""){
+
+alert("اكتب البريد الإلكتروني أولاً");
+
+return;
+
+}
+
+auth.sendPasswordResetEmail(email)
+
+.then(()=>{
+
+alert("تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني");
+
+})
+
+.catch((e)=>{
+
+alert(e.message);
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>

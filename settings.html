@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>إعدادات المعمل</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+<div class="logo">⚙️ إعدادات المعمل</div>
+
+<button class="login" onclick="window.location='profile.html'">
+⬅ رجوع
+</button>
+
+</header>
+
+<main style="padding:20px;">
+
+<div class="post">
+
+<div class="post-body">
+
+<h2>بيانات المعمل</h2>
+
+<input type="text" id="factoryName" placeholder="اسم المعمل">
+
+<input type="text" id="ownerName" placeholder="اسم صاحب المعمل">
+
+<input type="text" id="phone" placeholder="رقم الهاتف">
+
+<input type="text" id="city" placeholder="المحافظة">
+
+<input type="file" id="logo">
+
+<button onclick="saveSettings()">
+
+💾 حفظ
+
+</button>
+
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+function saveSettings(){
+
+let file=document.getElementById("logo").files[0];
+
+let reader=new FileReader();
+
+reader.onload=function(e){
+
+let data={
+
+factory:document.getElementById("factoryName").value,
+
+owner:document.getElementById("ownerName").value,
+
+phone:document.getElementById("phone").value,
+
+city:document.getElementById("city").value,
+
+logo:e.target.result
+
+};
+
+localStorage.setItem("factorySettings",JSON.stringify(data));
+
+alert("تم الحفظ");
+
+}
+
+if(file){
+
+reader.readAsDataURL(file);
+
+}else{
+
+let old=JSON.parse(localStorage.getItem("factorySettings"))||{};
+
+old.factory=document.getElementById("factoryName").value;
+old.owner=document.getElementById("ownerName").value;
+old.phone=document.getElementById("phone").value;
+old.city=document.getElementById("city").value;
+
+localStorage.setItem("factorySettings",JSON.stringify(old));
+
+alert("تم الحفظ");
+
+}
+
+}
+
+window.onload=function(){
+
+let data=JSON.parse(localStorage.getItem("factorySettings"));
+
+if(!data) return;
+
+factoryName.value=data.factory||"";
+ownerName.value=data.owner||"";
+phone.value=data.phone||"";
+city.value=data.city||"";
+
+}
+
+</script>
+
+</body>
+
+</html>
