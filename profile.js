@@ -1,176 +1,77 @@
-auth.onAuthStateChanged(function(user){
+auth.onAuthStateChanged(function(user) {
+    if (!user) {
+        location.href = "login.html";
+        return;
+    }
 
-if(!user){
+    // تحميل بيانات المستخدم
+    db.collection("users").doc(user.uid).get().then(function(doc) {
+        let data = doc.data();
+        document.getElementById("userName").innerText = data.name || data.owner || "مستخدم";
+        if (data.image || data.profileImage) {
+            document.getElementById("profileImage").src = data.image || data.profileImage;
+        }
+    });
 
-window.location="login.html";
-return;
+    // تحميل منشورات المستخدم
+    db.collection("posts")
+        .where("uid", "==", user.uid)
+        .get()
+        .then(function(snapshot) {
+            document.getElementById("postsCount").innerText = snapshot.size;
 
-}
-
-db.collection("users").doc(user.uid).get()
-
-.then(function(doc){
-
-if(doc.exists){
-
-let data=doc.data();
-document.getElementById("editFactory").value=data.factory||"";
-
-document.getElementById("editPhone").value=data.phone||"";
-
-document.getElementById("editCity").value=data.city||"";
-document.getElementById("userName").innerHTML=data.name||"";
-
-document.getElementById("factoryName").innerHTML="🏭 "+(data.factory||"لا يوجد");
-
-document.getElementById("userPhone").innerHTML="📞 "+(data.phone||"");
-
-document.getElementById("userCity").innerHTML="📍 "+(data.city||"");
-
-if(data.image){
-
-document.getElementById("profileImage").src=data.image;
-
-document.getElementById("publishProfileImage")?.setAttribute("src",data.image);
-
-}
-
-}
-
+            let html = "";
+            snapshot.forEach(function(doc) {
+                let post = doc.data();
+                html += `
+                <div class="post">
+                    ${post.image ? `<img src="${post.image}" class="post-image">` : ""}
+                    <div class="post-body">
+                        ${post.factory ? `<div class="post-title">🏭 ${post.factory}</div>` : ""}
+                        ${post.product ? `<div class="post-product">📦 ${post.product}</div>` : ""}
+                        <div class="post-description">${post.description || ''}</div>
+                        ${post.price ? `<div class="post-price">💰 ${post.price} د.ع</div>` : ""}
+                    </div>
+                </div>
+                `;
+            });
+            document.getElementById("userPosts").innerHTML = html || "<p style='text-align:center;color:#888;padding:30px;'>لا توجد منشورات</p>";
+        });
 });
 
-loadMyPosts(user.uid);
-
-});
-
-function loadMyPosts(uid){
-
-let html="";
-
-db.collection("posts")
-.where("uid","==",uid)
-.orderBy("time","desc")
-.get()
-.then(function(snapshot){
-
-snapshot.forEach(function(doc){
-
-let post=doc.data();
-
-html+=`
-
-<div class="post">
-
-${post.image?`<img src="${post.image}">`:""}
-
-<div class="post-info">
-
-<h3>🏭 ${post.factory}</h3>
-
-<h2>${post.product}</h2>
-
-<p>${post.description}</p>
-
-<h3>${post.price} د.ع</h3>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-if(html==""){
-
-html="<p style='text-align:center;padding:20px'>لا توجد منشورات بعد</p>";
-
+function editProfile() {
+    location.href = "edit-profile.html";
 }
 
-document.getElementById("myPosts").innerHTML=html;
-
-});
-
+function changeCover() {
+    alert("📷 سيتم إضافة تغيير الغلاف قريباً");
 }
 
-function editProfile(){
+// رفع صورة الملف الشخصي
+document.getElementById("profileUpload").onchange = async function() {
+    let file = this.files[0];
+    if (!file) return;
 
-alert("ميزة تعديل الملف الشخصي سنضيفها بالخطوة القادمة");
+    let formData = new FormData();
+    formData.append("image", file);
 
-}
-function saveProfile(){
+    let res = await fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
+        method: "POST",
+        body: formData
+    });
 
-let user=auth.currentUser;
+    let data = await res.json();
+    if (!data.success) {
+        alert("فشل رفع الصورة");
+        return;
+    }
 
-if(!user){
-return;
-}
+    let image = data.data.url;
+    await db.collection("users").doc(auth.currentUser.uid).update({
+        image: image,
+        profileImage: image
+    });
 
-let factory=document.getElementById("editFactory").value.trim();
-let phone=document.getElementById("editPhone").value.trim();
-let city=document.getElementById("editCity").value.trim();
-
-db.collection("users").doc(user.uid).set({
-
-factory:factory,
-phone:phone,
-city:city
-
-},{merge:true})
-
-.then(function(){
-
-alert("تم حفظ البيانات");
-
-location.reload();
-
-})
-
-.catch(function(){
-
-alert("حدث خطأ أثناء الحفظ");
-
-});
-
-}
-document.getElementById("profileUpload").addEventListener("change",function(){
-
-let file=this.files[0];
-
-if(!file) return;
-
-let formData=new FormData();
-
-formData.append("image",file);
-
-fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb",{
-
-method:"POST",
-
-body:formData
-
-})
-
-.then(r=>r.json())
-
-.then(data=>{
-
-if(data.success){
-
-let url=data.data.url;
-
-document.getElementById("profileImage").src=url;
-
-db.collection("users").doc(auth.currentUser.uid).set({
-
-image:url
-
-},{merge:true});
-
-alert("تم تغيير الصورة");
-
-}
-
-});
-
-});
+    document.getElementById("profileImage").src = image;
+    alert("✅ تم تغيير صورة الحساب");
+};

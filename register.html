@@ -2,181 +2,95 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>إنشاء حساب | نافذة</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء حساب | نافذة</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
 </head>
 
 <body class="login-page">
-
-<div class="login-container">
-
-<div class="login-logo">
-
-<img src="images/logo.png">
-
-<h1>نافذة</h1>
-
-<p>إنشاء حساب جديد</p>
-
-</div>
-
-<div class="login-card">
-
-<h2>إنشاء الحساب</h2>
-
-<input
-type="email"
-id="email"
-placeholder="البريد الإلكتروني">
-
-<div class="password-box">
-
-<input
-type="password"
-id="password"
-placeholder="كلمة المرور">
-
-<button
-type="button"
-id="showPass">
-
-👁
-
-</button>
-
-</div>
-
-<div class="password-box">
-
-<input
-type="password"
-id="confirm"
-
-placeholder="تأكيد كلمة المرور">
-
-</div>
-
-<button
-
-class="mainBtn"
-
-onclick="nextStep()">
-
-التالي
-
-</button>
-
-<br><br>
-
-<button
-
-class="createBtn"
-
-onclick="window.location='login.html'">
-
-لدي حساب
-
-</button>
-
-</div>
-
-</div>
-
-<div id="step2" style="display:none;">
-
-<h2>إكمال المعلومات</h2>
-
-<input type="text" id="name" placeholder="الاسم الكامل">
-
-<input type="text" id="factory" placeholder="اسم المعمل (اختياري)">
-
-<input type="tel" id="phone" placeholder="رقم الهاتف">
-
-<input type="text" id="city" placeholder="المحافظة">
-
-<input type="date" id="birth">
-
-<input type="file" id="image" accept="image/*">
-
-<button class="mainBtn" onclick="register()">
-إنشاء الحساب
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="firebase.js"></script>
-<script src="register.js"></script>
-
-<script>
-
-document.getElementById("showPass").onclick=function(){
-
-let p=document.getElementById("password");
-
-if(p.type=="password"){
-
-p.type="text";
-
-this.innerHTML="🙈";
-
-}else{
-
-p.type="password";
-
-this.innerHTML="👁";
-
-}
-
-};
-
-function nextStep(){
-
-let email=document.getElementById("email").value.trim();
-
-let pass=document.getElementById("password").value.trim();
-
-let confirm=document.getElementById("confirm").value.trim();
-
-if(email==""||pass==""||confirm==""){
-
-alert("املأ جميع الحقول");
-
-return;
-
-}
-
-if(pass!=confirm){
-
-alert("كلمتا المرور غير متطابقتين");
-
-return;
-
-}
-
-document.querySelector(".login-card").style.display="none";
-
-document.getElementById("step2").style.display="block";
-
-}
-
-</script>
-
+    <div class="login-container">
+        <div class="login-logo">
+            <img src="images/logo.png">
+            <h1>نافذة</h1>
+            <p>إنشاء حساب جديد</p>
+        </div>
+
+        <!-- الخطوة الأولى -->
+        <div class="login-card" id="step1">
+            <h2>إنشاء الحساب</h2>
+            <input type="email" id="email" placeholder="البريد الإلكتروني">
+            <div class="password-box">
+                <input type="password" id="password" placeholder="كلمة المرور">
+                <button type="button" id="showPass">👁</button>
+            </div>
+            <div class="password-box">
+                <input type="password" id="confirm" placeholder="تأكيد كلمة المرور">
+            </div>
+            <button class="mainBtn" onclick="nextStep()">التالي</button>
+            <br><br>
+            <button class="createBtn" onclick="window.location='login.html'">لدي حساب</button>
+        </div>
+
+        <!-- الخطوة الثانية -->
+        <div id="step2" style="display:none;">
+            <div class="login-card">
+                <h2>إكمال المعلومات</h2>
+                <input type="text" id="name" placeholder="الاسم الكامل">
+                <input type="text" id="factory" placeholder="اسم المعمل (اختياري)">
+                <input type="tel" id="phone" placeholder="رقم الهاتف">
+                <input type="text" id="city" placeholder="المحافظة">
+                <input type="date" id="birth">
+                <input type="file" id="image" accept="image/*">
+                <button class="mainBtn" onclick="register()">إنشاء الحساب</button>
+                <button class="createBtn" onclick="goBackStep1()" style="margin-top:10px;">⬅ رجوع</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="firebase.js"></script>
+    <script src="register.js"></script>
+
+    <script>
+        document.getElementById("showPass").onclick = function() {
+            let p = document.getElementById("password");
+            if (p.type == "password") {
+                p.type = "text";
+                this.innerHTML = "🙈";
+            } else {
+                p.type = "password";
+                this.innerHTML = "👁";
+            }
+        };
+
+        function nextStep() {
+            let email = document.getElementById("email").value.trim();
+            let pass = document.getElementById("password").value.trim();
+            let confirm = document.getElementById("confirm").value.trim();
+
+            if (email == "" || pass == "" || confirm == "") {
+                alert("املأ جميع الحقول");
+                return;
+            }
+            if (pass != confirm) {
+                alert("كلمتا المرور غير متطابقتين");
+                return;
+            }
+
+            document.getElementById("step1").style.display = "none";
+            document.getElementById("step2").style.display = "block";
+        }
+
+        function goBackStep1() {
+            document.getElementById("step1").style.display = "block";
+            document.getElementById("step2").style.display = "none";
+        }
+    </script>
 </body>
 
 </html>

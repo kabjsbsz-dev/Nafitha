@@ -2,101 +2,59 @@
 <html lang="ar" dir="rtl">
 
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>الملف الشخصي</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
-
-<script src="firebase.js"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>الملف الشخصي</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+    <script src="firebase.js"></script>
 </head>
 
 <body>
+    <div class="profile-cover">
+        <img id="coverImage" src="images/cover.jpg" class="cover-img">
+        <button class="cover-edit" onclick="changeCover()">📷</button>
+    </div>
 
-<div class="profile-cover"></div>
+    <div class="profile-header">
+        <img id="profileImage" src="images/logo.png" class="profile-img">
+        <button class="profile-edit" onclick="document.getElementById('profileUpload').click()">📷</button>
+        <input type="file" id="profileUpload" accept="image/*" style="display:none;">
+        <h2 id="userName">...</h2>
 
-<div class="profile-box">
+        <div class="profile-stats">
+            <div>
+                <b id="postsCount">0</b>
+                <span>منشور</span>
+            </div>
+            <div>
+                <b id="followersCount">0</b>
+                <span>متابع</span>
+            </div>
+            <div>
+                <b id="followingCount">0</b>
+                <span>يتابع</span>
+            </div>
+        </div>
 
-<img id="profileImage" src="images/logo.png" class="profile-img">
+        <div class="profile-buttons">
+            <button onclick="editProfile()">✏️ تعديل الملف</button>
+            <button onclick="location.href='home.html'">🏠 الرئيسية</button>
+        </div>
+    </div>
 
-<h2 id="userName">...</h2>
+    <div class="profile-tabs">
+        <button class="tab active">المنشورات</button>
+        <button class="tab">الصور</button>
+        <button class="tab">الفيديوهات</button>
+    </div>
 
-<p id="factoryName">اسم المعمل</p>
+    <div id="userPosts"></div>
 
-<p id="userPhone">📞</p>
-
-<p id="userCity">📍</p>
-
-<input
-type="file"
-id="profileUpload"
-accept="image/*"
-style="display:none;">
-
-<button
-class="follow-btn"
-onclick="document.getElementById('profileUpload').click()">
-
-📷 تغيير صورة الحساب
-
-</button>
-
-<input
-id="editFactory"
-placeholder="اسم المعمل">
-
-<input
-id="editPhone"
-placeholder="رقم الهاتف">
-
-<input
-id="editCity"
-placeholder="المحافظة">
-
-<button
-class="mainBtn"
-onclick="saveProfile()">
-
-💾 حفظ البيانات
-
-</button>
-
-<div class="profile-buttons">
-
-<button class="follow-btn" onclick="editProfile()">
-
-✏️ تعديل الملف
-
-</button>
-
-<button class="message-btn" onclick="window.location='home.html'">
-
-🏠 الرئيسية
-
-</button>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h3>منشوراتي</h3>
-
-<div id="myPosts"></div>
-
-</div>
-
-<script src="profile.js"></script>
-
+    <script src="profile.js"></script>
 </body>
 
 </html>
