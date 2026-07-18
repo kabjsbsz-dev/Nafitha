@@ -576,3 +576,18 @@ button {
         font-size: 18px;
     }
 }
+/* ===== تصغير الشعار وإصلاح الواجهة ===== */
+.top-logo { width: 28px; height: 28px; }
+.logo { font-size: 16px; gap: 4px; }
+
+.login-card input {
+    border-radius: 30px !important;
+    padding: 14px 18px !important;
+}
+
+.login-card .mainBtn,
+.login-card .googleBtn,
+.login-card .createBtn {
+    border-radius: 30px !important;
+    padding: 14px !important;
+}
