@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,51 +11,46 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
     <script src="firebase.js"></script>
 </head>
-
 <body>
     <header class="topbar">
-        <div class="logo">
-            <img src="images/logo.png" class="top-logo">
-            <span>نافذة</span>
-        </div>
+        <div class="logo">👤 الملف الشخصي</div>
         <div class="top-right">
             <button onclick="window.location='home.html'">🏠</button>
         </div>
     </header>
 
     <div class="profile-cover">
-        <img id="coverImage" src="images/cover.jpg" class="cover-img">
+        <img id="coverImage" src="images/cover.jpg" class="cover-img" onerror="this.src='images/cover.jpg'">
         <button class="cover-edit" onclick="changeCover()">📷</button>
     </div>
 
     <div class="profile-header">
-        <img id="profileImage" src="images/logo.png" class="profile-img">
+        <img id="profileImage" src="images/logo.png" class="profile-img" onerror="this.src='images/logo.png'">
         <button class="profile-edit" onclick="document.getElementById('profileUpload').click()">📷</button>
         <input type="file" id="profileUpload" accept="image/*" style="display:none;">
-        <h2 id="userName">...</h2>
-        <p id="userBio" style="color:#888;font-size:14px;">مرحباً! أنا على نافذة</p>
-        <p id="userCity" style="color:#888;font-size:14px;">📍 ...</p>
+        <h2 id="userName">...جاري التحميل</h2>
+        <p id="userBio" style="color:rgba(255,255,255,0.6);font-size:14px;">مرحباً! أنا على نافذة</p>
+        <p id="userCity" style="color:rgba(255,255,255,0.4);font-size:14px;">📍 غير محدد</p>
 
         <div class="profile-stats">
+            <div onclick="showFollowers()">
+                <b id="followersCount">0</b>
+                <span>متابع</span>
+            </div>
+            <div onclick="showFollowing()">
+                <b id="followingCount">0</b>
+                <span>يتابع</span>
+            </div>
             <div>
                 <b id="postsCount">0</b>
                 <span>منشور</span>
             </div>
-            <div onclick="showFollowers()" style="cursor:pointer;">
-                <b id="followersCount">0</b>
-                <span>متابع</span>
-            </div>
-            <div onclick="showFollowing()" style="cursor:pointer;">
-                <b id="followingCount">0</b>
-                <span>يتابع</span>
-            </div>
         </div>
-
-        <div class="profile-buttons">
+                <div class="profile-buttons">
             <button id="followBtn" onclick="toggleFollow()" style="display:none;">➕ متابعة</button>
             <button onclick="editProfile()">✏️ تعديل الملف</button>
             <button onclick="window.location='home.html'">🏠 الرئيسية</button>
-            <button onclick="logout()" style="background:#d32f2f;color:#fff;">🚪 تسجيل خروج</button>
+            <button onclick="logout()" style="background:rgba(255,0,0,0.15);border-color:rgba(255,0,0,0.3);">🚪 تسجيل خروج</button>
         </div>
     </div>
 
@@ -70,5 +64,4 @@
 
     <script src="profile.js"></script>
 </body>
-
 </html>

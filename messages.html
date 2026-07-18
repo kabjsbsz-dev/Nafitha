@@ -1,39 +1,88 @@
-```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرسائل</title>
+    <title>المحادثات - نافذة</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
     <script src="firebase.js"></script>
+    <style>
+        .chat-list {
+            padding: 10px;
+        }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .chat-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(-4px);
+        }
+        .chat-item img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #FFD700;
+        }
+        .chat-item .chat-info {
+            flex: 1;
+        }
+        .chat-item .chat-name {
+            font-weight: bold;
+            color: #fff;
+        }
+        .chat-item .chat-last {
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 2px;
+        }
+        .chat-item .chat-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+        }
+        .chat-empty {
+            text-align: center;
+            color: rgba(255,255,255,0.4);
+            padding: 50px 20px;
+        }
+        .chat-empty span {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        body.dark-mode .chat-item {
+            background: rgba(255,255,255,0.06);
+        }
+    </style>
 </head>
-
 <body>
     <header class="topbar">
-        <div class="logo">💬 الرسائل</div>
+        <div class="logo">💬 المحادثات</div>
         <div class="top-right">
-            <button onclick="toggleDarkMode()">🌙</button>
             <button onclick="window.location='home.html'">🏠</button>
         </div>
     </header>
 
-    <div style="padding:14px;">
-        <div class="post">
-            <div class="post-body" style="text-align:center;padding:30px;">
-                <div style="font-size:48px;">💬</div>
-                <p style="color:#888;font-size:16px;">قريباً... نظام الدردشة المباشرة</p>
-                <p style="color:#aaa;font-size:14px;">سيتم إضافة محادثات خاصة بين المستخدمين</p>
-            </div>
+    <div class="chat-list" id="chatList">
+        <div class="chat-empty">
+            <span>💬</span>
+            جاري التحميل...
         </div>
     </div>
+
+    <script src="messages.js"></script>
 </body>
-
 </html>
-```
-
----
