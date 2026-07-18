@@ -591,3 +591,261 @@ button {
     border-radius: 30px !important;
     padding: 14px !important;
 }
+/* =============================================
+   ===== واجهة تسجيل الدخول الاحترافية =====
+   ============================================= */
+
+/* ===== خلفية متدرجة ===== */
+.login-page {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Tahoma', sans-serif;
+}
+
+/* ===== حاوية الكارد ===== */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeUp 0.8s ease-out;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== الشعار ===== */
+.login-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-logo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #FFD700;
+    padding: 12px;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+    transition: transform 0.3s;
+}
+
+.login-logo img:hover {
+    transform: scale(1.05);
+}
+
+.login-logo h1 {
+    color: #FFD700;
+    font-size: 32px;
+    margin-top: 12px;
+    letter-spacing: 2px;
+}
+
+.login-logo p {
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* ===== الكارد ===== */
+.login-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    padding: 32px 28px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.login-card h2 {
+    text-align: center;
+    color: #fff;
+    font-size: 24px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* ===== الحقول ===== */
+.login-card input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s;
+    margin-bottom: 14px;
+}
+
+.login-card input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.login-card input:focus {
+    border-color: #FFD700;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+/* ===== حقل كلمة المرور ===== */
+.password-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s;
+    margin-bottom: 14px;
+}
+
+.password-box:focus-within {
+    border-color: #FFD700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+}
+
+.password-box input {
+    flex: 1;
+    border: none !important;
+    background: transparent !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+    padding: 16px 20px;
+}
+
+.password-box button {
+    width: 50px;
+    height: 50px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.password-box button:hover {
+    color: #FFD700;
+}
+
+/* ===== أزرار ===== */
+.mainBtn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #FFD700, #f5a623);
+    color: #111;
+    border: none;
+    border-radius: 50px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+    margin-top: 6px;
+}
+
+.mainBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(255, 215, 0, 0.4);
+}
+
+.mainBtn:active {
+    transform: scale(0.97);
+}
+
+/* ===== زر Google ===== */
+.googleBtn {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.googleBtn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ===== الروابط ===== */
+.login-links {
+    text-align: center;
+    margin: 18px 0 20px;
+}
+
+.login-links a {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.login-links a:hover {
+    color: #FFD700;
+}
+
+.login-card hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 20px 0;
+}
+
+/* ===== زر إنشاء حساب ===== */
+.createBtn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.createBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ===== استجابة للجوال ===== */
+@media(max-width: 480px) {
+    .login-card {
+        padding: 24px 18px;
+    }
+    .login-logo img {
+        width: 64px;
+        height: 64px;
+        padding: 10px;
+    }
+    .login-logo h1 {
+        font-size: 26px;
+    }
+    .login-card h2 {
+        font-size: 20px;
+    }
+    .mainBtn, .googleBtn, .createBtn {
+        font-size: 15px;
+        padding: 14px;
+    }
+}
