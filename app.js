@@ -8,37 +8,36 @@ document.getElementById("popup").style.display="none";
 
 function addPost(){
 
-let factory=document.getElementById("factory").value.trim();
-let owner=document.getElementById("owner").value.trim();
+let factory="";
+let owner="";
 let product=document.getElementById("product").value.trim();
 let price=document.getElementById("price").value.trim();
-let phone=document.getElementById("phone").value.trim();
-let city=document.getElementById("city").value.trim();
-let location=document.getElementById("location").value.trim();
+let phone="";
+let city="";
+let location="";
 let description=document.getElementById("description").value.trim();
 let image=document.getElementById("image").files[0];
 
-if(factory==""||owner==""||product==""){
-
+if(product=="" && description==""){
 alert("املأ جميع الحقول المطلوبة");
-
 return;
-
 }
 
 let uid=auth.currentUser.uid;
 
 if(image){
 
-let formData = new FormData();
-formData.append("image", image);
+let formData=new FormData();
+formData.append("image",image);
 
 fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb",{
 method:"POST",
 body:formData
 })
-.then(response => response.json())
-.then(data => {
+
+.then(r=>r.json())
+
+.then(data=>{
 
 if(data.success){
 
@@ -51,10 +50,10 @@ alert("فشل رفع الصورة");
 }
 
 })
-.catch(error => {
 
-console.log(error);
-alert("خطأ في رفع الصورة");
+.catch(()=>{
+
+alert("حدث خطأ أثناء رفع الصورة");
 
 });
 
@@ -64,63 +63,40 @@ savePost("");
 
 }
 
-
 function savePost(imageUrl){
 
 db.collection("posts").add({
 
 uid:uid,
-
+profileImage:document.getElementById("publishProfileImage").src,
 factory:factory,
-
-owner:owner,
-
+owner:document.getElementById("publishUserName").innerText,
 product:product,
-
 price:price,
-
 phone:phone,
-
 city:city,
-
 location:location,
-
 description:description,
-
 image:imageUrl,
-
 likes:0,
-
 favorites:0,
-
 views:0,
-
+comments:0,
 time:Date.now()
 
 })
 
-.then(function(){
-
-alert("تم نشر المنشور");
-
-document.getElementById("factory").value="";
-document.getElementById("owner").value="";
-document.getElementById("product").value="";
-document.getElementById("price").value="";
-document.getElementById("phone").value="";
-document.getElementById("city").value="";
-document.getElementById("location").value="";
-document.getElementById("description").value="";
-document.getElementById("image").value="";
+.then(()=>{
 
 closeForm();
+
 loadPosts();
 
 })
-.catch(function(error){
 
-console.log(error);
-alert("فشل نشر المنشور");
+.catch(()=>{
+
+alert("فشل النشر");
 
 });
 
@@ -137,89 +113,121 @@ let search=document.getElementById("search").value.toLowerCase();
 db.collection("posts")
 .orderBy("time","desc")
 .get()
+
 .then(function(snapshot){
 
 snapshot.forEach(function(doc){
 
 let post=doc.data();
 
-let postDate = new Date(post.time);
-let now = new Date();
-
-let diff = Math.floor((now - postDate) / 1000);
-
-let timeText = "الآن";
-
-if(diff >= 60){
-timeText = Math.floor(diff/60) + " دقيقة";
-}
-
-if(diff >= 3600){
-timeText = Math.floor(diff/3600) + " ساعة";
-}
-
-if(diff >= 86400){
-timeText = Math.floor(diff/86400) + " يوم";
-}
-db.collection("posts").doc(doc.id).update({
-views:(post.views||0)+1
-});
 if(
 post.factory.toLowerCase().includes(search)||
 post.product.toLowerCase().includes(search)||
 post.city.toLowerCase().includes(search)
 ){
+  let diff=Math.floor((Date.now()-post.time)/1000);
+
+let timeText="الآن";
+
+if(diff>=60) timeText=Math.floor(diff/60)+" دقيقة";
+if(diff>=3600) timeText=Math.floor(diff/3600)+" ساعة";
+if(diff>=86400) timeText=Math.floor(diff/86400)+" يوم";
 
 html+=`
 
 <div class="post">
 
-${post.image?`<img src="${post.image}" class="post-image" onclick="openImage('${post.image}')">`:""}
+<div class="post-header">
 
-<div class="post-info">
+<div class="post-left">
 
-<h3>🏭 ${post.factory}</h3>
+<img class="post-avatar"
+src="images/logo.png">
 
-<p>👤 ${post.owner}</p>
+<div class="post-user-info">
 
-<p style="color:#999;font-size:13px;">
+<div class="post-user-name">
+${post.owner}
+</div>
+
+<div class="post-user-time">
 🕒 ${timeText}
-</p>
+</div>
 
-<p>📍 ${post.city}</p>
+</div>
 
-<h2>${post.product}</h2>
+</div>
 
-<p>${post.description}</p>
+<div class="post-right">
 
-<h3>${post.price} د.ع</h3>
+<button class="menu-btn"
+onclick="toggleMenu('${doc.id}')">
+⋮
+</button>
 
-<p>👁️ ${post.views||0} مشاهدة</p>
+</div>
+
+</div>
+
+<div class="post-body">
+
+<div class="post-title">
+🏭 ${post.factory}
+</div>
+
+<div class="post-product">
+${post.product}
+</div>
+
+<div class="post-description">
+${post.description}
+</div>
+
+<div class="post-price">
+${post.price} د.ع
+</div>
+${post.image ? `
+<img
+src="${post.image}"
+class="post-image"
+onclick="openImage('${post.image}')">
+` : ""}
+
+<div class="post-stats">
+
+<span>
+👁️ ${post.views||0} مشاهدة
+</span>
+
+<span>
+💬 ${post.comments||0} تعليق
+</span>
+
 </div>
 
 <div class="post-actions">
-
-<button onclick="likePost('${doc.id}',${post.likes||0})">
-❤️ ${post.likes||0}
+<button class="action-btn"
+onclick="likePost('${doc.id}',${post.likes||0})">
+👍
+<span>أعجبني</span>
 </button>
 
-<button onclick="openComments('${doc.id}')">
-💬 تعليق
+<button class="action-btn"
+onclick="openComments('${doc.id}')">
+💬
+<span>تعليق</span>
 </button>
 
-<button onclick="favoritePost('${doc.id}',${post.favorites||0})">
-⭐
+<button class="action-btn"
+onclick="sharePost('${post.product}','${post.price}')">
+↗️
+<span>مشاركة</span>
 </button>
 
-<button onclick="window.location.href='tel:${post.phone}'">
-📞
-</button>
-
-<button onclick="window.open('https://wa.me/${post.phone}')">
-واتساب
-<button onclick="sharePost('${post.product}','${post.price}')">
-📤
-</button>
+<button class="action-btn"
+onclick="favoritePost('${doc.id}',${post.favorites||0})">
+🔖
+<span>حفظ</span>
 </button>
 
 </div>
@@ -242,13 +250,9 @@ function likePost(id,likes){
 
 db.collection("posts").doc(id).update({
 
-likes:likes+1
+likes:(likes||0)+1
 
-}).then(function(){
-
-loadPosts();
-
-});
+}).then(loadPosts);
 
 }
 
@@ -282,43 +286,15 @@ loadPosts();
 
 window.onload=function(){
 
-if(document.getElementById("search")){
+let search=document.getElementById("search");
 
-document.getElementById("search").addEventListener("keyup",loadPosts);
+if(search){
+
+search.addEventListener("keyup",loadPosts);
 
 }
 
 };
-
-function openImage(src){
-
-let viewer=document.createElement("div");
-viewer.className="image-viewer";
-
-viewer.innerHTML=`
-<span class="close-viewer">&times;</span>
-
-<img src="${src}" id="zoomImage">
-
-<a href="${src}" download class="download-btn">
-تحميل الصورة
-</a>
-`;
-
-document.body.appendChild(viewer);
-
-viewer.querySelector(".close-viewer").onclick=function(){
-viewer.remove();
-};
-
-viewer.onclick=function(e){
-if(e.target===viewer){
-viewer.remove();
-}
-};
-
-}
-
 function openImage(src){
 
 let viewer=document.createElement("div");
@@ -327,7 +303,9 @@ viewer.className="image-viewer";
 
 viewer.innerHTML=`
 <span class="close-viewer">&times;</span>
+
 <img src="${src}" class="viewer-img">
+
 <a href="${src}" download class="download-btn">
 تحميل الصورة
 </a>
@@ -346,7 +324,12 @@ viewer.remove();
 };
 
 }
+
 function openComments(postId){
+
+alert("سيتم إضافة التعليقات قريبًا");
+
+}
 
 function sharePost(product,price){
 
@@ -364,6 +347,98 @@ alert("المشاركة غير مدعومة على هذا الجهاز");
 }
 
 }
-alert("ميزة التعليقات سنضيفها بالخطوة القادمة.");
+
+function toggleMenu(id){
+
+let menu=document.getElementById("menu-"+id);
+
+if(menu){
+
+if(menu.style.display=="block"){
+
+menu.style.display="none";
+
+}else{
+
+document.querySelectorAll(".menu-box").forEach(function(item){
+
+item.style.display="none";
+
+});
+
+menu.style.display="block";
 
 }
+
+}
+
+}
+
+function deletePost(postId,ownerId){
+
+if(!auth.currentUser) return;
+
+if(auth.currentUser.uid!==ownerId){
+
+alert("لا يمكنك حذف هذا المنشور");
+
+return;
+
+}
+
+if(!confirm("هل تريد حذف المنشور؟")) return;
+
+db.collection("posts").doc(postId).delete()
+
+.then(function(){
+
+loadPosts();
+
+});
+
+}
+function toggleProductFields(){
+
+let box=document.getElementById("productFields");
+
+if(box.style.display=="none" || box.style.display==""){
+
+box.style.display="block";
+
+}else{
+
+box.style.display="none";
+
+}
+
+}
+
+auth.onAuthStateChanged(function(user){
+
+if(!user) return;
+
+db.collection("users").doc(user.uid).get()
+
+.then(function(doc){
+
+if(doc.exists){
+
+let data=doc.data();
+
+if(document.getElementById("publishUserName")){
+
+document.getElementById("publishUserName").innerText=data.name||data.owner||"مستخدم";
+
+}
+
+if(document.getElementById("publishProfileImage")){
+
+document.getElementById("publishProfileImage").src=data.photo||"images/logo.png";
+
+}
+
+}
+
+});
+
+});

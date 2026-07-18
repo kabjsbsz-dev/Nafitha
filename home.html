@@ -80,39 +80,75 @@ placeholder="ابحث عن معمل أو منتج أو محافظة">
 
 <div class="popup" id="popup">
 
-<div class="form">
+<div class="facebook-post">
 
-<h2>إضافة منشور</h2>
+<div class="post-top">
 
-<input id="factory" placeholder="اسم المعمل">
+<button class="close-post" onclick="closeForm()">✕</button>
 
-<input id="owner" placeholder="اسم صاحب المعمل">
+<h2>منشور جديد</h2>
 
-<input id="product" placeholder="اسم المنتج">
-
-<input id="price" placeholder="السعر">
-
-<input id="phone" placeholder="رقم الهاتف">
-
-<input id="city" placeholder="المحافظة">
-
-<input id="location" placeholder="العنوان">
-
-<textarea id="description" placeholder="اكتب تفاصيل المنتج"></textarea>
-
-<input type="file" id="image" accept="image/*">
-
-<button class="mainBtn" onclick="addPost()">
-
-نشر المنشور
-
+<button class="publish-btn" onclick="addPost()">
+نشر
 </button>
 
-<button class="createBtn" onclick="closeForm()">
+</div>
 
-إلغاء
+<div class="post-user">
 
+<img id="publishProfileImage"
+src="images/logo.png"
+class="publish-avatar">
+
+<div class="publish-user-info">
+
+<h3 id="publishUserName">
+جاري التحميل...
+</h3>
+
+<p>منشور عام 🌍</p>
+
+</div>
+
+</div>
+
+<textarea
+id="description"
+class="publish-text"
+placeholder="بماذا تفكر؟ أو اكتب تفاصيل المنتج...">
+</textarea>
+
+<div id="productFields" style="display:none;">
+
+<input
+id="product"
+placeholder="اسم المنتج">
+
+<input
+id="price"
+placeholder="السعر">
+
+</div>
+
+<input
+type="file"
+id="image"
+accept="image/*"
+style="display:none;">
+
+<div class="publish-tools">
+
+<button
+onclick="document.getElementById('image').click()">
+🖼️ صورة
 </button>
+
+<button
+onclick="toggleProductFields()">
+🏷️ إضافة منتج
+</button>
+
+</div>
 
 </div>
 

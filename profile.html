@@ -35,7 +35,39 @@
 
 <p id="userCity">📍</p>
 
-<p id="userBirth">🎂</p>
+<input
+type="file"
+id="profileUpload"
+accept="image/*"
+style="display:none;">
+
+<button
+class="follow-btn"
+onclick="document.getElementById('profileUpload').click()">
+
+📷 تغيير صورة الحساب
+
+</button>
+
+<input
+id="editFactory"
+placeholder="اسم المعمل">
+
+<input
+id="editPhone"
+placeholder="رقم الهاتف">
+
+<input
+id="editCity"
+placeholder="المحافظة">
+
+<button
+class="mainBtn"
+onclick="saveProfile()">
+
+💾 حفظ البيانات
+
+</button>
 
 <div class="profile-buttons">
 

@@ -14,7 +14,11 @@ db.collection("users").doc(user.uid).get()
 if(doc.exists){
 
 let data=doc.data();
+document.getElementById("editFactory").value=data.factory||"";
 
+document.getElementById("editPhone").value=data.phone||"";
+
+document.getElementById("editCity").value=data.city||"";
 document.getElementById("userName").innerHTML=data.name||"";
 
 document.getElementById("factoryName").innerHTML="🏭 "+(data.factory||"لا يوجد");
@@ -23,11 +27,11 @@ document.getElementById("userPhone").innerHTML="📞 "+(data.phone||"");
 
 document.getElementById("userCity").innerHTML="📍 "+(data.city||"");
 
-document.getElementById("userBirth").innerHTML="🎂 "+(data.birth||"");
-
 if(data.image){
 
 document.getElementById("profileImage").src=data.image;
+
+document.getElementById("publishProfileImage")?.setAttribute("src",data.image);
 
 }
 
@@ -94,3 +98,79 @@ function editProfile(){
 alert("ميزة تعديل الملف الشخصي سنضيفها بالخطوة القادمة");
 
 }
+function saveProfile(){
+
+let user=auth.currentUser;
+
+if(!user){
+return;
+}
+
+let factory=document.getElementById("editFactory").value.trim();
+let phone=document.getElementById("editPhone").value.trim();
+let city=document.getElementById("editCity").value.trim();
+
+db.collection("users").doc(user.uid).set({
+
+factory:factory,
+phone:phone,
+city:city
+
+},{merge:true})
+
+.then(function(){
+
+alert("تم حفظ البيانات");
+
+location.reload();
+
+})
+
+.catch(function(){
+
+alert("حدث خطأ أثناء الحفظ");
+
+});
+
+}
+document.getElementById("profileUpload").addEventListener("change",function(){
+
+let file=this.files[0];
+
+if(!file) return;
+
+let formData=new FormData();
+
+formData.append("image",file);
+
+fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb",{
+
+method:"POST",
+
+body:formData
+
+})
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(data.success){
+
+let url=data.data.url;
+
+document.getElementById("profileImage").src=url;
+
+db.collection("users").doc(auth.currentUser.uid).set({
+
+image:url
+
+},{merge:true});
+
+alert("تم تغيير الصورة");
+
+}
+
+});
+
+});
