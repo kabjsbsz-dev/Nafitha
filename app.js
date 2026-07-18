@@ -143,6 +143,27 @@ snapshot.forEach(function(doc){
 
 let post=doc.data();
 
+let postDate = new Date(post.time);
+let now = new Date();
+
+let diff = Math.floor((now - postDate) / 1000);
+
+let timeText = "الآن";
+
+if(diff >= 60){
+timeText = Math.floor(diff/60) + " دقيقة";
+}
+
+if(diff >= 3600){
+timeText = Math.floor(diff/3600) + " ساعة";
+}
+
+if(diff >= 86400){
+timeText = Math.floor(diff/86400) + " يوم";
+}
+db.collection("posts").doc(doc.id).update({
+views:(post.views||0)+1
+});
 if(
 post.factory.toLowerCase().includes(search)||
 post.product.toLowerCase().includes(search)||
@@ -161,6 +182,10 @@ ${post.image?`<img src="${post.image}" class="post-image" onclick="openImage('${
 
 <p>👤 ${post.owner}</p>
 
+<p style="color:#999;font-size:13px;">
+🕒 ${timeText}
+</p>
+
 <p>📍 ${post.city}</p>
 
 <h2>${post.product}</h2>
@@ -169,32 +194,32 @@ ${post.image?`<img src="${post.image}" class="post-image" onclick="openImage('${
 
 <h3>${post.price} د.ع</h3>
 
+<p>👁️ ${post.views||0} مشاهدة</p>
 </div>
 
 <div class="post-actions">
 
 <button onclick="likePost('${doc.id}',${post.likes||0})">
-
 ❤️ ${post.likes||0}
+</button>
 
+<button onclick="openComments('${doc.id}')">
+💬 تعليق
 </button>
 
 <button onclick="favoritePost('${doc.id}',${post.favorites||0})">
-
 ⭐
-
 </button>
 
 <button onclick="window.location.href='tel:${post.phone}'">
-
 📞
-
 </button>
 
 <button onclick="window.open('https://wa.me/${post.phone}')">
-
-💬
-
+واتساب
+<button onclick="sharePost('${post.product}','${post.price}')">
+📤
+</button>
 </button>
 
 </div>
@@ -319,5 +344,26 @@ if(e.target===viewer){
 viewer.remove();
 }
 };
+
+}
+function openComments(postId){
+
+function sharePost(product,price){
+
+if(navigator.share){
+
+navigator.share({
+title:"نافذة",
+text:product+" - "+price+" د.ع"
+});
+
+}else{
+
+alert("المشاركة غير مدعومة على هذا الجهاز");
+
+}
+
+}
+alert("ميزة التعليقات سنضيفها بالخطوة القادمة.");
 
 }
