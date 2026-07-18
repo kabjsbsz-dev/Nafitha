@@ -1,40 +1,98 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الإشعارات</title>
+    <title>الإشعارات - نافذة</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
     <script src="firebase.js"></script>
 </head>
-
 <body>
     <header class="topbar">
         <div class="logo">🔔 الإشعارات</div>
-        <button onclick="window.location='home.html'" style="color:#FFD700;font-size:24px;">🏠</button>
-    </header>
-
-    <div style="padding:20px;">
-        <div class="post">
-            <div class="post-body" style="text-align:center;padding:40px;">
-                <div style="font-size:48px;margin-bottom:15px;">📭</div>
-                <p style="color:#888;font-size:18px;">لا توجد إشعارات جديدة</p>
-                <p style="color:#aaa;font-size:14px;margin-top:8px;">ستظهر الإشعارات هنا عند التفاعل مع منشوراتك</p>
-            </div>
+        <div class="top-right">
+            <button onclick="window.location='home.html'">🏠</button>
         </div>
-    </div>
-
-    <script>
+    </header>
+    <div id="notificationsList" style="padding:10px;"></div>
+        <script>
         auth.onAuthStateChanged(function(user) {
             if (!user) {
                 window.location = "login.html";
+                return;
             }
+            loadNotifications();
         });
+
+        function loadNotifications() {
+            let uid = auth.currentUser.uid;
+
+            db.collection("users").doc(uid).collection("notifications")
+                .orderBy("time", "desc")
+                .limit(30)
+                .get()
+                .then(function(snapshot) {
+                    let html = "";
+                    if (snapshot.empty) {
+                        html = "<div class='post'><div class='post-body'><p style='text-align:center;color:#888;padding:30px;'>📭 لا توجد إشعارات</p></div></div>";
+                        document.getElementById("notificationsList").innerHTML = html;
+                        return;
+                    }
+
+                    snapshot.forEach(function(doc) {
+                        let n = doc.data();
+                        let timeText = getTimeText(n.time);
+                        let icon = getNotificationIcon(n.type);
+
+                        html += `
+                        <div class="post" onclick="markRead('${doc.id}')" style="${n.read ? 'opacity:0.6;' : 'border-right:4px solid #1877f2;'}">
+                            <div class="post-body">
+                                <p>${icon} ${n.message}</p>
+                                <span style="color:#888;font-size:12px;">🕒 ${timeText}</span>
+                            </div>
+                        </div>
+                        `;
+                    });
+
+                    document.getElementById("notificationsList").innerHTML = html;
+                })
+                .catch(function(err) {
+                    console.error("خطأ:", err);
+                });
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'like': return '❤️';
+                case 'comment': return '💬';
+                case 'follow': return '👤';
+                case 'new_post': return '📢';
+                default: return '🔔';
+            }
+        }
+
+        function getTimeText(timestamp) {
+            if (!timestamp) return "الآن";
+            let diff = Math.floor((Date.now() - timestamp) / 1000);
+            if (diff < 60) return "الآن";
+            if (diff < 3600) return Math.floor(diff / 60) + " دقيقة";
+            if (diff < 86400) return Math.floor(diff / 3600) + " ساعة";
+            if (diff < 604800) return Math.floor(diff / 86400) + " يوم";
+            return new Date(timestamp).toLocaleDateString("ar");
+        }
+
+        function markRead(notifId) {
+            let uid = auth.currentUser.uid;
+            db.collection("users").doc(uid).collection("notifications")
+                .doc(notifId).update({ read: true })
+                .then(function() {
+                    loadNotifications();
+                });
+        }
     </script>
 </body>
-
 </html>

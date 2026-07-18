@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل الملف الشخصي</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
+    <script src="firebase.js"></script>
+    <style>
+        /* تنسيقات خاصة بصفحة التعديل */
+        .edit-container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .edit-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .edit-container label {
+            display: block;
+            margin: 12px 0 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .edit-container input, .edit-container textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+        .edit-container input:focus, .edit-container textarea:focus {
+            border-color: #FFD700;
+        }
+        .edit-container textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        .edit-container .file-input {
+            padding: 8px 0;
+        }
+        .edit-container .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 8px 0;
+        }
+        .edit-container .image-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+        .edit-container .btn-save {
+            width: 100%;
+            padding: 14px;
+            background: #FFD700;
+            color: #111;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .edit-container .btn-save:hover {
+            background: #e6c200;
+        }
+        .edit-container .btn-cancel {
+            width: 100%;
+            padding: 12px;
+            background: #e4e6eb;
+            color: #333;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .edit-container .btn-cancel:hover {
+            background: #d0d2d6;
+        }
+        .topbar {
+            background: #fff;
+            padding: 12px 16px;
+            border-bottom: 2px solid #FFD700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .topbar .back-btn {
+            font-size: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        body.dark-mode .edit-container {
+            background: #242526;
+            color: #e4e6eb;
+        }
+        body.dark-mode .edit-container input,
+        body.dark-mode .edit-container textarea {
+            background: #3a3b3c;
+            color: #e4e6eb;
+            border-color: #4e4f50;
+        }
+        body.dark-mode .edit-container .btn-cancel {
+            background: #3a3b3c;
+            color: #e4e6eb;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <button class="back-btn" onclick="window.location='profile.html'">←</button>
+        <span style="font-size:18px;font-weight:bold;">تعديل الملف الشخصي</span>
+        <span></span>
+    </div>
+
+    <div class="edit-container" id="editForm">
+        <h2>✏️ تعديل المعلومات</h2>
+
+        <!-- صورة البروفايل -->
+        <label>صورة البروفايل</label>
+        <input type="file" id="profileImageInput" accept="image/*" class="file-input">
+        <div class="image-preview" id="profilePreview"></div>
+
+        <!-- صورة الغلاف -->
+        <label>صورة الغلاف</label>
+        <input type="file" id="coverImageInput" accept="image/*" class="file-input">
+        <div class="image-preview" id="coverPreview"></div>
+
+        <!-- معلومات -->
+        <label>الاسم الكامل</label>
+        <input type="text" id="editName" placeholder="الاسم الكامل">
+
+        <label>السيرة الذاتية (نبذة)</label>
+        <textarea id="editBio" placeholder="اكتب نبذة عنك..."></textarea>
+
+        <label>المدينة</label>
+        <input type="text" id="editCity" placeholder="المدينة">
+
+        <label>رقم الهاتف</label>
+        <input type="tel" id="editPhone" placeholder="رقم الهاتف">
+
+        <label>اسم المعمل (اختياري)</label>
+        <input type="text" id="editFactory" placeholder="اسم المعمل">
+
+        <!-- أزرار -->
+        <button class="btn-save" onclick="saveProfile()">💾 حفظ التغييرات</button>
+        <button class="btn-cancel" onclick="window.location='profile.html'">إلغاء</button>
+    </div>
+
+    <script src="edit-profile.js"></script>
+</body>
+
+</html>

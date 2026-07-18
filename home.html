@@ -20,32 +20,33 @@
             <span>نافذة</span>
         </div>
         <div class="top-right">
-            <button onclick="window.location='profile.html'">👤</button>
-            <button onclick="window.location='notifications.html'">🔔</button>
-        </div>
+    <button onclick="window.location='notifications.html'">🔔</button>
+    <button onclick="window.location='profile.html'">👤</button>
+</div>
     </header>
 
     <div class="search-box">
-        <input type="text" id="search" placeholder="ابحث عن معمل أو منتج أو محافظة">
+        <input type="text" id="search" placeholder="ابحث عن معمل، منتج، مدينة، أو مستخدم...">
     </div>
 
     <div class="categories">
-        <button onclick="searchCategory('أبواب')">🚪 أبواب</button>
-        <button onclick="searchCategory('شبابيك')">🪟 شبابيك</button>
-        <button onclick="searchCategory('واجهات')">🏢 واجهات</button>
-        <button onclick="searchCategory('مطابخ')">🍽 مطابخ</button>
-        <button onclick="searchCategory('كلادينك')">🧱 كلادينك</button>
-        <button onclick="searchCategory('سلالم')">🪜 سلالم</button>
+        <button onclick="filterByCategory('أبواب')">🚪 أبواب</button>
+        <button onclick="filterByCategory('شبابيك')">🪟 شبابيك</button>
+        <button onclick="filterByCategory('واجهات')">🏢 واجهات</button>
+        <button onclick="filterByCategory('مطابخ')">🍽 مطابخ</button>
+        <button onclick="filterByCategory('كلادينك')">🧱 كلادينك</button>
+        <button onclick="filterByCategory('سلالم')">🪜 سلالم</button>
+        <button onclick="filterByCategory('')" style="background:#FFD700;">🗑️ إلغاء التصنيف</button>
     </div>
 
     <div class="new-post">
         <button onclick="showForm()">➕ إضافة منشور جديد</button>
     </div>
 
-    <div id="posts"></div>
+    <div id="usersResults"></div>
 
-    <!-- ===== نافذة النشر ===== -->
-    <div class="popup" id="popup">
+    <div id="posts"></div>
+        <div class="popup" id="popup">
         <div class="facebook-post">
             <div class="post-top">
                 <button class="close-post" onclick="closeForm()">✕</button>
@@ -63,6 +64,19 @@
 
             <textarea id="description" class="publish-text" placeholder="بماذا تفكر؟ أو اكتب تفاصيل المنتج..."></textarea>
 
+            <div style="padding:0 20px 10px;">
+                <select id="postCategory" style="width:100%;padding:12px;border:1px solid #444;border-radius:10px;background:#2a2a2a;color:#fff;">
+                    <option value="">-- اختر التصنيف (اختياري) --</option>
+                    <option value="أبواب">🚪 أبواب</option>
+                    <option value="شبابيك">🪟 شبابيك</option>
+                    <option value="واجهات">🏢 واجهات</option>
+                    <option value="مطابخ">🍽 مطابخ</option>
+                    <option value="كلادينك">🧱 كلادينك</option>
+                    <option value="سلالم">🪜 سلالم</option>
+                    <option value="أخرى">📦 أخرى</option>
+                </select>
+            </div>
+
             <div id="productFields" style="display:none;padding:0 20px;">
                 <input id="product" placeholder="اسم المنتج" style="width:100%;padding:12px;border:1px solid #444;border-radius:10px;background:#2a2a2a;color:#fff;margin-bottom:8px;">
                 <input id="price" placeholder="السعر (دينار)" style="width:100%;padding:12px;border:1px solid #444;border-radius:10px;background:#2a2a2a;color:#fff;margin-bottom:8px;">
@@ -77,26 +91,14 @@
         </div>
     </div>
 
-    <!-- ===== القائمة السفلية ===== -->
     <nav class="bottom-nav">
-        <button onclick="window.location='home.html'">🏠</button>
-        <button onclick="window.location='favorites.html'">⭐</button>
-        <button onclick="showForm()">➕</button>
-        <button onclick="window.location='notifications.html'">🔔</button>
-        <button onclick="window.location='profile.html'">👤</button>
-    </nav>
+    <button onclick="window.location='home.html'">🏠</button>
+    <button onclick="showForm()">➕</button>
+    <button onclick="window.location='notifications.html'">🔔</button>
+    <button onclick="window.location='profile.html'">👤</button>
+</nav>
 
     <script src="app.js"></script>
-    <script>
-        function searchCategory(cat) {
-            document.getElementById("search").value = cat;
-            loadPosts();
-        }
-
-        document.getElementById("search").addEventListener("input", function() {
-            loadPosts();
-        });
-    </script>
 </body>
 
 </html>

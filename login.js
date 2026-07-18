@@ -57,7 +57,57 @@ function login() {
         });
 }
 
-auth.onAuthStateChanged(function(user) {
+// ===== تسجيل الدخول بواسطة Google =====
+function loginWithGoogle() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({
+        prompt: 'select_account'
+    });
+
+    firebase.auth().signInWithPopup(provider)
+        .then(function(result) {
+            var user = result.user;
+            var uid = user.uid;
+            var email = user.email;
+            var name = user.displayName || "مستخدم";
+
+            db.collection("users").doc(uid).get()
+                .then(function(doc) {
+                    if (doc.exists) {
+                        localStorage.setItem("uid", uid);
+                        localStorage.setItem("userName", doc.data().name || name);
+                        localStorage.setItem("profileImage", doc.data().image || user.photoURL || "images/logo.png");
+                        window.location.href = "home.html";
+                    } else {
+                        if (confirm("مرحباً! حسابك الجديد. تريد إكمال البيانات؟")) {
+                            localStorage.setItem("googleEmail", email);
+                            localStorage.setItem("googleName", name);
+                            localStorage.setItem("googlePhoto", user.photoURL || "");
+                            localStorage.setItem("googleUid", uid);
+                            window.location.href = "register.html?google=true";
+                        } else {
+                            db.collection("users").doc(uid).set({
+                                name: name,
+                                email: email,
+                                image: user.photoURL || "images/logo.png",
+                                type: "user",
+                                created: Date.now()
+                            }).then(function() {
+                                localStorage.setItem("uid", uid);
+                                localStorage.setItem("userName", name);
+                                localStorage.setItem("profileImage", user.photoURL || "images/logo.png");
+                                window.location.href = "home.html";
+                            });
+                        }
+                    }
+                });
+        })
+        .catch(function(error) {
+            alert("فشل تسجيل الدخول: " + error.message);
+        });
+}
+
+firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
         window.location = "home.html";
     }

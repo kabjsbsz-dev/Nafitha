@@ -14,6 +14,16 @@
 </head>
 
 <body>
+    <header class="topbar">
+        <div class="logo">
+            <img src="images/logo.png" class="top-logo">
+            <span>نافذة</span>
+        </div>
+        <div class="top-right">
+            <button onclick="window.location='home.html'">🏠</button>
+        </div>
+    </header>
+
     <div class="profile-cover">
         <img id="coverImage" src="images/cover.jpg" class="cover-img">
         <button class="cover-edit" onclick="changeCover()">📷</button>
@@ -24,32 +34,36 @@
         <button class="profile-edit" onclick="document.getElementById('profileUpload').click()">📷</button>
         <input type="file" id="profileUpload" accept="image/*" style="display:none;">
         <h2 id="userName">...</h2>
+        <p id="userBio" style="color:#888;font-size:14px;">مرحباً! أنا على نافذة</p>
+        <p id="userCity" style="color:#888;font-size:14px;">📍 ...</p>
 
         <div class="profile-stats">
             <div>
                 <b id="postsCount">0</b>
                 <span>منشور</span>
             </div>
-            <div>
+            <div onclick="showFollowers()" style="cursor:pointer;">
                 <b id="followersCount">0</b>
                 <span>متابع</span>
             </div>
-            <div>
+            <div onclick="showFollowing()" style="cursor:pointer;">
                 <b id="followingCount">0</b>
                 <span>يتابع</span>
             </div>
         </div>
 
         <div class="profile-buttons">
+            <button id="followBtn" onclick="toggleFollow()" style="display:none;">➕ متابعة</button>
             <button onclick="editProfile()">✏️ تعديل الملف</button>
-            <button onclick="location.href='home.html'">🏠 الرئيسية</button>
+            <button onclick="window.location='home.html'">🏠 الرئيسية</button>
+            <button onclick="logout()" style="background:#d32f2f;color:#fff;">🚪 تسجيل خروج</button>
         </div>
     </div>
 
     <div class="profile-tabs">
-        <button class="tab active">المنشورات</button>
-        <button class="tab">الصور</button>
-        <button class="tab">الفيديوهات</button>
+        <button class="tab active" onclick="switchTab('posts')">المنشورات</button>
+        <button class="tab" onclick="switchTab('photos')">الصور</button>
+        <button class="tab" onclick="switchTab('favorites')">المفضلة</button>
     </div>
 
     <div id="userPosts"></div>

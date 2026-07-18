@@ -1,4 +1,7 @@
-// ===== عرض نموذج النشر =====
+// =============================================
+// ===== app.js - الجزء 1: دوال النشر الأساسية =====
+// =============================================
+
 function showForm() {
     document.getElementById("popup").style.display = "flex";
 }
@@ -7,11 +10,11 @@ function closeForm() {
     document.getElementById("popup").style.display = "none";
 }
 
-// ===== إضافة منشور جديد =====
 function addPost() {
     let product = document.getElementById("product").value.trim();
     let price = document.getElementById("price").value.trim();
     let description = document.getElementById("description").value.trim();
+    let category = document.getElementById("postCategory").value;
     let image = document.getElementById("image").files[0];
 
     if (!auth.currentUser) {
@@ -47,9 +50,9 @@ function addPost() {
                 description: description,
                 product: product,
                 price: price,
+                category: category,
                 image: imageUrl || "",
                 likes: 0,
-                favorites: 0,
                 views: 0,
                 comments: 0,
                 time: Date.now()
@@ -64,9 +67,11 @@ function addPost() {
                     document.getElementById("price").value = "";
                     document.getElementById("image").value = "";
                     document.getElementById("productFields").style.display = "none";
+                    document.getElementById("postCategory").value = "";
+                    alert("✅ تم النشر بنجاح");
                 })
                 .catch(function(err) {
-                    alert("فشل النشر: " + err.message);
+                    alert("❌ فشل النشر: " + err.message);
                 });
         }
 
@@ -93,14 +98,23 @@ function addPost() {
         }
     });
 }
+// =============================================
+// ===== app.js - الجزء 2: تحميل المنشورات والبحث =====
+// =============================================
 
-// ===== تحميل المنشورات =====
-function loadPosts() {
+let currentCategory = "";
+
+function loadPosts(category) {
+    if (category !== undefined) {
+        currentCategory = category;
+    }
+
     let html = "";
     let search = document.getElementById("search").value.toLowerCase();
 
+    document.getElementById("usersResults").innerHTML = "";
+
     db.collection("posts")
-        .orderBy("time", "desc")
         .get()
         .then(function(snapshot) {
             if (snapshot.empty) {
@@ -109,78 +123,196 @@ function loadPosts() {
                 return;
             }
 
+            let posts = [];
             snapshot.forEach(function(doc) {
                 let post = doc.data();
-                let productText = post.product || "";
-
-                if (
-                    (post.factory && post.factory.toLowerCase().includes(search)) ||
-                    productText.toLowerCase().includes(search) ||
-                    (post.city && post.city.toLowerCase().includes(search))
-                ) {
-                    let diff = Math.floor((Date.now() - post.time) / 1000);
-                    let timeText = "الآن";
-                    if (diff >= 60) timeText = Math.floor(diff / 60) + " دقيقة";
-                    if (diff >= 3600) timeText = Math.floor(diff / 3600) + " ساعة";
-                    if (diff >= 86400) timeText = Math.floor(diff / 86400) + " يوم";
-
-                    html += `
-                    <div class="post" id="post-${doc.id}">
-                        <div class="post-header">
-                            <div class="post-left">
-                                <img class="post-avatar" src="${post.profileImage || 'images/logo.png'}">
-                                <div class="post-user-info">
-                                    <div class="post-user-name">${post.owner || 'مستخدم'}</div>
-                                    <div class="post-user-time">🕒 ${timeText}</div>
-                                </div>
-                            </div>
-                            <div class="post-right">
-                                <button class="menu-btn" onclick="toggleMenu('${doc.id}')">⋮</button>
-                                <div class="menu-box" id="menu-${doc.id}" style="display:none;position:absolute;background:#fff;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);padding:8px;z-index:100;margin-top:30px;">
-                                    ${auth.currentUser && auth.currentUser.uid === post.uid ? `
-                                        <button onclick="deletePost('${doc.id}','${post.uid}')" style="display:block;width:100%;padding:8px 16px;border:none;background:none;text-align:right;color:#d32f2f;font-size:14px;">🗑 حذف</button>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="post-body">
-                            ${post.factory ? `<div class="post-title">🏭 ${post.factory}</div>` : ''}
-                            ${post.product ? `<div class="post-product">📦 ${post.product}</div>` : ''}
-                            <div class="post-description">${post.description || ''}</div>
-                            ${post.price ? `<div class="post-price">💰 ${post.price} د.ع</div>` : ''}
-                            ${post.image ? `<img src="${post.image}" class="post-image" onclick="openImage('${post.image}')">` : ''}
-                            <div class="post-stats">
-                                <span>👁️ ${post.views || 0}</span>
-                                <span>💬 ${post.comments || 0}</span>
-                                <span>👍 ${post.likes || 0}</span>
-                            </div>
-                            <div class="post-actions">
-                                <button class="action-btn" onclick="likePost('${doc.id}',${post.likes || 0})">👍 أعجبني</button>
-                                <button class="action-btn" onclick="openComments('${doc.id}')">💬 تعليق</button>
-                                <button class="action-btn" onclick="sharePost('${post.product || ''}','${post.price || ''}')">↗️ مشاركة</button>
-                            </div>
-                        </div>
-                    </div>`;
-                }
+                post.id = doc.id;
+                posts.push(post);
             });
 
-            document.getElementById("posts").innerHTML = html || `<div class="post"><div class="post-body"><p style="text-align:center;color:#888;padding:30px;">🔍 لا توجد نتائج</p></div></div>`;
+            posts.sort(function(a, b) {
+                return b.time - a.time;
+            });
+
+            let filteredPosts = posts;
+            if (currentCategory) {
+                filteredPosts = posts.filter(function(post) {
+                    return post.category === currentCategory;
+                });
+            }
+
+            if (search) {
+                filteredPosts = filteredPosts.filter(function(post) {
+                    let productText = post.product || "";
+                    let factoryText = post.factory || "";
+                    let cityText = post.city || "";
+                    let descriptionText = post.description || "";
+                    let ownerText = post.owner || "";
+                    return productText.toLowerCase().includes(search) ||
+                           factoryText.toLowerCase().includes(search) ||
+                           cityText.toLowerCase().includes(search) ||
+                           descriptionText.toLowerCase().includes(search) ||
+                           ownerText.toLowerCase().includes(search);
+                });
+            }
+
+            if (filteredPosts.length === 0) {
+                document.getElementById("posts").innerHTML =
+                    `<div class="post"><div class="post-body"><p style="text-align:center;color:#888;padding:30px;">🔍 لا توجد منشورات مطابقة</p></div></div>`;
+                return;
+            }
+
+            filteredPosts.forEach(function(post) {
+                let diff = Math.floor((Date.now() - post.time) / 1000);
+                let timeText = "الآن";
+                if (diff >= 60) timeText = Math.floor(diff / 60) + " دقيقة";
+                if (diff >= 3600) timeText = Math.floor(diff / 3600) + " ساعة";
+                if (diff >= 86400) timeText = Math.floor(diff / 86400) + " يوم";
+
+                let categoryBadge = post.category ?
+                    `<span style="background:#1877f2;color:#fff;padding:2px 10px;border-radius:12px;font-size:12px;">${post.category}</span>` :
+                    "";
+
+                html += `
+                <div class="post" id="post-${post.id}">
+                    <div class="post-header">
+                        <div class="post-left">
+                            <img class="post-avatar" src="${post.profileImage || 'images/logo.png'}">
+                            <div class="post-user-info">
+                                <div class="post-user-name">${post.owner || 'مستخدم'} ${categoryBadge}</div>
+                                <div class="post-user-time">🕒 ${timeText}</div>
+                            </div>
+                        </div>
+                        <div class="post-right">
+                            <button class="menu-btn" onclick="toggleMenu('${post.id}')">⋮</button>
+                            <div class="menu-box" id="menu-${post.id}" style="display:none;position:absolute;background:#fff;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.2);padding:8px;z-index:100;margin-top:30px;">
+                                ${auth.currentUser && auth.currentUser.uid === post.uid ? `
+                                    <button onclick="deletePost('${post.id}','${post.uid}')" style="display:block;width:100%;padding:8px 16px;border:none;background:none;text-align:right;color:#d32f2f;font-size:14px;">🗑 حذف</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-body">
+                        ${post.factory ? `<div class="post-title">🏭 ${post.factory}</div>` : ''}
+                        ${post.product ? `<div class="post-product">📦 ${post.product}</div>` : ''}
+                        <div class="post-description">${post.description || ''}</div>
+                        ${post.price ? `<div class="post-price">💰 ${post.price} د.ع</div>` : ''}
+                        ${post.image ? `<img src="${post.image}" class="post-image" onclick="openImage('${post.image}')">` : ''}
+                        <div class="post-stats">
+                            <span>👁️ ${post.views || 0}</span>
+                            <span>💬 ${post.comments || 0}</span>
+                            <span>👍 ${post.likes || 0}</span>
+                        </div>
+                        <div class="post-actions">
+                            <button class="action-btn" onclick="likePost('${post.id}')">👍 أعجبني</button>
+                            <button class="action-btn" onclick="openComments('${post.id}')">💬 تعليق</button>
+                            <button class="action-btn" onclick="sharePost('${post.product || ''}','${post.price || ''}')">↗️ مشاركة</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById("posts").innerHTML = html;
+
+            if (search.length >= 2) {
+                searchUsers(search);
+            }
+
         })
         .catch(function(err) {
-            console.error("خطأ بتحميل المنشورات:", err);
+            console.error("خطأ:", err);
             document.getElementById("posts").innerHTML =
-                `<div class="post"><div class="post-body"><p style="text-align:center;color:#d32f2f;padding:30px;">❌ حدث خطأ أثناء تحميل المنشورات</p></div></div>`;
+                `<div class="post"><div class="post-body"><p style="text-align:center;color:#d32f2f;padding:30px;">❌ حدث خطأ: ${err.message}</p></div></div>`;
         });
 }
 
-// ===== إعجاب =====
-function likePost(id, likes) {
-    db.collection("posts").doc(id).update({
-        likes: (likes || 0) + 1
-    }).then(loadPosts).catch(() => {});
+function searchUsers(query) {
+    db.collection("users")
+        .get()
+        .then(function(snapshot) {
+            let results = [];
+            snapshot.forEach(function(doc) {
+                let user = doc.data();
+                user.id = doc.id;
+                let name = (user.name || "").toLowerCase();
+                let city = (user.city || "").toLowerCase();
+                let factory = (user.factory || "").toLowerCase();
+                let q = query.toLowerCase();
+
+                if (name.includes(q) || city.includes(q) || factory.includes(q)) {
+                    results.push(user);
+                }
+            });
+
+            let usersHtml = "";
+            if (results.length > 0) {
+                usersHtml = `<div style="margin:10px 12px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom:10px;font-size:16px;">👤 مستخدمون (${results.length})</h3>`;
+                results.forEach(function(user) {
+                    let img = user.image || user.profileImage || "images/logo.png";
+                    usersHtml += `
+                    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #f0f2f5;cursor:pointer;" onclick="viewProfile('${user.id}')">
+                        <img src="${img}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #FFD700;">
+                        <div>
+                            <div style="font-weight:bold;font-size:15px;">${user.name || 'مستخدم'}</div>
+                            <div style="font-size:13px;color:#888;">${user.city || ''} ${user.factory ? '🏭 '+user.factory : ''}</div>
+                        </div>
+                    </div>`;
+                });
+                usersHtml += `</div>`;
+            }
+
+            document.getElementById("usersResults").innerHTML = usersHtml;
+        })
+        .catch(function(err) {
+            console.error("خطأ في البحث عن المستخدمين:", err);
+        });
 }
 
-// ===== عرض الصورة =====
+function filterByCategory(category) {
+    document.getElementById("search").value = category;
+    loadPosts(category);
+}
+
+function viewProfile(uid) {
+    window.location.href = "profile.html?uid=" + uid;
+}
+// =============================================
+// ===== app.js - الجزء 3: دوال التفاعل والإدارة =====
+// =============================================
+
+function likePost(postId) {
+    if (!auth.currentUser) {
+        alert("يرجى تسجيل الدخول");
+        return;
+    }
+
+    let uid = auth.currentUser.uid;
+
+    db.collection("posts").doc(postId).get()
+        .then(function(doc) {
+            if (!doc.exists) return;
+            let post = doc.data();
+            let likedBy = post.likedBy || [];
+
+            if (likedBy.includes(uid)) {
+                alert("❌ لقد أعجبت بالفعل");
+                return;
+            }
+
+            return db.collection("posts").doc(postId).update({
+                likes: (post.likes || 0) + 1,
+                likedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+            });
+        })
+        .then(function() {
+            loadPosts(currentCategory);
+        })
+        .catch(function(err) {
+            console.error("خطأ في الإعجاب:", err);
+        });
+}
+
 function openImage(src) {
     let viewer = document.createElement("div");
     viewer.className = "image-viewer";
@@ -195,228 +327,57 @@ function openImage(src) {
     };
 }
 
-// ===== فتح التعليقات (زي فيسبوك بالضبط) =====
-let currentReplyData = { postId: null, commentId: null, userName: null };
-
 function openComments(postId) {
-    // إخفاء أي نافذة مفتوحة
-    let oldPopup = document.getElementById("commentPopup");
-    if (oldPopup) oldPopup.remove();
-
     let commentBox = document.createElement("div");
     commentBox.className = "popup";
     commentBox.style.display = "flex";
-    commentBox.id = "commentPopup";
     commentBox.innerHTML = `
-        <div class="comments-container" style="width:92%;max-width:500px;background:#fff;border-radius:18px;padding:20px;max-height:85vh;display:flex;flex-direction:column;">
-            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:12px;">
-                <h2 style="margin:0;font-size:20px;">💬 التعليقات</h2>
-                <button onclick="this.closest('.popup').remove()" style="font-size:24px;background:none;border:none;cursor:pointer;">✕</button>
-            </div>
-            
-            <!-- قائمة التعليقات -->
-            <div id="commentsList" style="flex:1;overflow-y:auto;margin:15px 0;padding-left:5px;"></div>
-            
-            <!-- حقل كتابة التعليق -->
-            <div style="border-top:1px solid #eee;padding-top:12px;">
-                <div style="display:flex;gap:8px;">
-                    <input type="text" id="commentInput" placeholder="اكتب تعليقاً..." style="flex:1;padding:12px;border:1px solid #ddd;border-radius:25px;outline:none;">
-                    <button onclick="addComment('${postId}')" style="padding:12px 20px;background:#1877f2;color:#fff;border:none;border-radius:25px;font-weight:bold;">نشر</button>
-                </div>
-            </div>
+        <div class="form" style="max-width:500px;background:#fff;border-radius:18px;padding:20px;">
+            <h2 style="text-align:center;">💬 التعليقات</h2>
+            <div id="commentsList" style="max-height:300px;overflow:auto;text-align:right;margin:15px 0;"></div>
+            <input type="text" id="commentInput" placeholder="اكتب تعليقك..." style="width:100%;padding:12px;border:1px solid #ddd;border-radius:12px;margin-bottom:10px;">
+            <button onclick="addComment('${postId}')" style="width:100%;padding:12px;background:#1877f2;color:#fff;border:none;border-radius:12px;font-weight:bold;">إرسال</button>
+            <button onclick="this.closest('.popup').remove()" style="width:100%;padding:12px;background:#ccc;border:none;border-radius:12px;margin-top:8px;">إغلاق</button>
         </div>
     `;
     document.body.appendChild(commentBox);
 
-    // تحميل التعليقات
-    loadComments(postId);
-}
-
-// ===== تحميل التعليقات مع الردود (زي فيسبوك) =====
-function loadComments(postId) {
     db.collection("posts").doc(postId).collection("comments")
         .orderBy("time", "desc")
         .get()
         .then(function(snapshot) {
             let html = "";
-
-            if (snapshot.empty) {
-                document.getElementById("commentsList").innerHTML = 
-                    `<p style="text-align:center;color:#888;padding:30px;">💬 لا توجد تعليقات، كن أول من يعلق!</p>`;
-                return;
-            }
-
             snapshot.forEach(function(doc) {
                 let c = doc.data();
-                let commentId = doc.id;
-                let timeText = getTimeText(c.time);
-
-                // بناء الردود
-                let repliesHtml = "";
-                if (c.replies && c.replies.length > 0) {
-                    repliesHtml = `
-                    <div style="padding-right:20px;border-right:2px solid #e4e6eb;margin-top:8px;">
-                        ${c.replies.map((r, index) => `
-                            <div style="padding:8px 0;border-bottom:${index < c.replies.length - 1 ? '1px solid #f0f2f5' : 'none'};">
-                                <div style="display:flex;align-items:center;gap:6px;">
-                                    <b style="color:#1877f2;font-size:14px;">${r.name || 'مستخدم'}</b>
-                                    <span style="color:#888;font-size:11px;">${getTimeText(r.time)}</span>
-                                </div>
-                                <p style="margin:4px 0 0 0;font-size:14px;color:#111;">${r.text}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                    `;
-                }
-
-                html += `
-                <div style="border-bottom:1px solid #f0f2f5;padding:12px 0;" id="comment-${commentId}">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                        <div style="flex:1;">
-                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                                <b style="color:#111;font-size:15px;">${c.name || 'مستخدم'}</b>
-                                <span style="color:#888;font-size:12px;">${timeText}</span>
-                            </div>
-                            <p style="margin:6px 0 8px 0;font-size:15px;color:#111;">${c.text}</p>
-                            <button onclick="showReply('${postId}','${commentId}','${c.name}')" style="color:#65676b;font-size:13px;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;">
-                                رد
-                            </button>
-                        </div>
-                    </div>
-                    ${repliesHtml}
-                </div>
-                `;
+                html += `<p style="border-bottom:1px solid #eee;padding:10px 0;"><b>${c.name || 'مستخدم'}</b>: ${c.text}</p>`;
             });
-
-            document.getElementById("commentsList").innerHTML = html;
+            document.getElementById("commentsList").innerHTML = html || "<p style='color:#888;text-align:center;'>لا توجد تعليقات</p>";
         });
 }
 
-// ===== عرض الوقت =====
-function getTimeText(timestamp) {
-    if (!timestamp) return "الآن";
-    let diff = Math.floor((Date.now() - timestamp) / 1000);
-    if (diff < 60) return "الآن";
-    if (diff < 3600) return Math.floor(diff / 60) + " دقيقة";
-    if (diff < 86400) return Math.floor(diff / 3600) + " ساعة";
-    if (diff < 604800) return Math.floor(diff / 86400) + " يوم";
-    return new Date(timestamp).toLocaleDateString("ar");
-}
-
-// ===== إظهار مربع الرد =====
-function showReply(postId, commentId, userName) {
-    // نبحث عن مكان الرد داخل التعليق
-    let commentDiv = document.getElementById("comment-" + commentId);
-    if (!commentDiv) return;
-
-    // إذا كان فيه مربع رد مفتوح نغلقه
-    let existingReply = commentDiv.querySelector(".reply-input-area");
-    if (existingReply) {
-        existingReply.remove();
-        return;
-    }
-
-    let replyHtml = `
-    <div class="reply-input-area" style="display:flex;gap:8px;margin-top:8px;padding-right:20px;">
-        <input type="text" id="replyInput-${commentId}" placeholder="اكتب رداً على ${userName}..." style="flex:1;padding:10px 16px;border:1px solid #ddd;border-radius:25px;outline:none;font-size:14px;">
-        <button onclick="submitReply('${postId}','${commentId}')" style="padding:10px 18px;background:#f9a825;color:#111;border:none;border-radius:25px;font-weight:bold;font-size:14px;">رد</button>
-        <button onclick="this.parentElement.remove()" style="padding:10px 14px;background:#e4e6eb;border:none;border-radius:25px;font-size:16px;">✕</button>
-    </div>
-    `;
-
-    commentDiv.insertAdjacentHTML("beforeend", replyHtml);
-
-    // تركيز على حقل الإدخال
-    let input = document.getElementById("replyInput-" + commentId);
-    if (input) input.focus();
-}
-
-// ===== إرسال رد =====
-function submitReply(postId, commentId) {
-    let input = document.getElementById("replyInput-" + commentId);
-    if (!input) return;
-
-    let text = input.value.trim();
-    if (!text) {
-        alert("اكتب ردك أولاً");
-        return;
-    }
-
-    let user = auth.currentUser;
-    if (!user) {
-        alert("يرجى تسجيل الدخول");
-        return;
-    }
-
-    db.collection("users").doc(user.uid).get().then(function(doc) {
-        let name = doc.data().name || doc.data().owner || "مستخدم";
-
-        db.collection("posts").doc(postId).collection("comments")
-            .doc(commentId)
-            .update({
-                replies: firebase.firestore.FieldValue.arrayUnion({
-                    name: name,
-                    text: text,
-                    time: Date.now()
-                })
-            })
-            .then(function() {
-                // حذف مربع الرد
-                let replyArea = input.closest(".reply-input-area");
-                if (replyArea) replyArea.remove();
-
-                // إعادة تحميل التعليقات
-                loadComments(postId);
-            })
-            .catch(function(err) {
-                alert("فشل الرد: " + err.message);
-            });
-    });
-}
-
-// ===== إضافة تعليق جديد =====
 function addComment(postId) {
-    let input = document.getElementById("commentInput");
-    let text = input.value.trim();
-
-    if (!text) {
-        alert("اكتب تعليقاً");
-        return;
-    }
-
+    let text = document.getElementById("commentInput").value.trim();
+    if (!text) { alert("اكتب تعليقاً"); return; }
     let user = auth.currentUser;
-    if (!user) {
-        alert("يرجى تسجيل الدخول");
-        return;
-    }
+    if (!user) { alert("يرجى تسجيل الدخول"); return; }
 
     db.collection("users").doc(user.uid).get().then(function(doc) {
         let name = doc.data().name || doc.data().owner || "مستخدم";
-
         db.collection("posts").doc(postId).collection("comments").add({
             uid: user.uid,
             name: name,
             text: text,
             time: Date.now()
-        })
-        .then(function() {
-            input.value = "";
-
-            // تحديث عدد التعليقات في المنشور
+        }).then(function() {
+            document.getElementById("commentInput").value = "";
             db.collection("posts").doc(postId).update({
                 comments: firebase.firestore.FieldValue.increment(1)
             });
-
-            // إعادة تحميل التعليقات
-            loadComments(postId);
-        })
-        .catch(function(err) {
-            alert("فشل النشر: " + err.message);
+            openComments(postId);
         });
     });
 }
 
-// ===== مشاركة =====
 function sharePost(product, price) {
     let text = product + " - " + price + " د.ع";
     if (navigator.share) {
@@ -430,7 +391,6 @@ function sharePost(product, price) {
     }
 }
 
-// ===== قائمة الخيارات =====
 function toggleMenu(id) {
     document.querySelectorAll(".menu-box").forEach(function(item) {
         if (item.id !== "menu-" + id) {
@@ -443,7 +403,6 @@ function toggleMenu(id) {
     }
 }
 
-// ===== حذف منشور =====
 function deletePost(postId, ownerId) {
     if (!auth.currentUser) return;
     if (auth.currentUser.uid !== ownerId) {
@@ -453,20 +412,18 @@ function deletePost(postId, ownerId) {
     if (!confirm("هل تريد حذف المنشور؟")) return;
     db.collection("posts").doc(postId).delete()
         .then(function() {
-            loadPosts();
+            loadPosts(currentCategory);
         })
         .catch(function(err) {
             alert("فشل الحذف: " + err.message);
         });
 }
 
-// ===== إظهار/إخفاء حقول المنتج =====
 function toggleProductFields() {
     let box = document.getElementById("productFields");
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
 }
 
-// ===== تحميل بيانات المستخدم في نموذج النشر =====
 auth.onAuthStateChanged(function(user) {
     if (!user) {
         window.location = "login.html";
@@ -488,10 +445,177 @@ auth.onAuthStateChanged(function(user) {
         });
 });
 
-// ===== بحث =====
 window.onload = function() {
     let search = document.getElementById("search");
     if (search) {
-        search.addEventListener("keyup", loadPosts);
+        search.addEventListener("input", function() {
+            currentCategory = "";
+            loadPosts();
+        });
     }
 };
+// ===== زر الرجوع (Back Button) =====
+let backPressed = false;
+
+window.addEventListener('popstate', function(e) {
+    if (document.getElementById('popup').style.display === 'flex') {
+        closeForm();
+        return;
+    }
+    
+    if (window.location.pathname.includes('home.html')) {
+        if (!backPressed) {
+            backPressed = true;
+            alert("اضغط رجوع مرة أخرى للخروج");
+            setTimeout(function() {
+                backPressed = false;
+            }, 2000);
+        } else {
+            window.close();
+        }
+    } else {
+        window.history.back();
+    }
+});
+
+// إضافة حالة للـ popstate
+if (window.location.pathname.includes('home.html')) {
+    window.history.pushState(null, null, window.location.href);
+}
+// =============================================
+// ===== نظام الإشعارات المتكامل =====
+// =============================================
+
+// ===== 1. إرسال إشعار =====
+function sendNotification(targetUid, type, message, link) {
+    if (!targetUid || targetUid === auth.currentUser?.uid) return;
+    
+    db.collection("users").doc(targetUid).collection("notifications").add({
+        type: type,
+        message: message,
+        link: link || "#",
+        read: false,
+        time: Date.now()
+    }).catch(function(err) {
+        console.error("خطأ في الإشعار:", err);
+    });
+}
+
+// ===== 2. إشعار عند الإعجاب (موجود، نعدله) =====
+// استبدل دالة likePost بهذه:
+function likePost(postId) {
+    if (!auth.currentUser) {
+        alert("يرجى تسجيل الدخول");
+        return;
+    }
+
+    let uid = auth.currentUser.uid;
+
+    db.collection("posts").doc(postId).get()
+        .then(function(doc) {
+            if (!doc.exists) return;
+            let post = doc.data();
+            let likedBy = post.likedBy || [];
+
+            if (likedBy.includes(uid)) {
+                alert("❌ لقد أعجبت بالفعل");
+                return;
+            }
+
+            return db.collection("posts").doc(postId).update({
+                likes: (post.likes || 0) + 1,
+                likedBy: firebase.firestore.FieldValue.arrayUnion(uid)
+            }).then(function() {
+                // إرسال إشعار لصاحب المنشور
+                if (post.uid !== uid) {
+                    db.collection("users").doc(uid).get().then(function(userDoc) {
+                        let name = userDoc.data()?.name || "مستخدم";
+                        sendNotification(post.uid, "like", `${name} أعجب بمنشورك`, "/home");
+                    });
+                }
+                loadPosts(currentCategory);
+            });
+        })
+        .catch(function(err) {
+            console.error("خطأ في الإعجاب:", err);
+        });
+}
+
+// ===== 3. إشعار عند التعليق =====
+// استبدل دالة addComment بهذه:
+function addComment(postId) {
+    let text = document.getElementById("commentInput").value.trim();
+    if (!text) { alert("اكتب تعليقاً"); return; }
+    let user = auth.currentUser;
+    if (!user) { alert("يرجى تسجيل الدخول"); return; }
+
+    db.collection("users").doc(user.uid).get().then(function(doc) {
+        let name = doc.data().name || doc.data().owner || "مستخدم";
+        
+        db.collection("posts").doc(postId).collection("comments").add({
+            uid: user.uid,
+            name: name,
+            text: text,
+            time: Date.now()
+        }).then(function() {
+            document.getElementById("commentInput").value = "";
+            db.collection("posts").doc(postId).update({
+                comments: firebase.firestore.FieldValue.increment(1)
+            });
+            
+            // إرسال إشعار لصاحب المنشور
+            db.collection("posts").doc(postId).get().then(function(postDoc) {
+                if (postDoc.exists) {
+                    let post = postDoc.data();
+                    if (post.uid !== user.uid) {
+                        sendNotification(post.uid, "comment", `${name} علق على منشورك: "${text}"`, "/home");
+                    }
+                }
+            });
+            
+            openComments(postId);
+        });
+    });
+}
+
+// ===== 4. إشعار عند المتابعة =====
+// استبدل دالة followUser بهذه:
+function followUser(targetUid) {
+    if (!auth.currentUser) { alert("يرجى تسجيل الدخول"); return; }
+    let uid = auth.currentUser.uid;
+    if (uid === targetUid) { alert("لا يمكنك متابعة نفسك"); return; }
+
+    db.collection("users").doc(targetUid).update({
+        followers: firebase.firestore.FieldValue.arrayUnion(uid)
+    });
+
+    db.collection("users").doc(uid).update({
+        following: firebase.firestore.FieldValue.arrayUnion(targetUid)
+    }).then(function() {
+        // إرسال إشعار للمستخدم المستهدف
+        db.collection("users").doc(uid).get().then(function(userDoc) {
+            let name = userDoc.data()?.name || "مستخدم";
+            sendNotification(targetUid, "follow", `${name} بدأ متابعتك`, "/profile?uid=" + uid);
+        });
+        alert("✅ تمت المتابعة");
+        loadProfile(targetUid);
+    });
+}
+
+// ===== 5. إشعار عند نشر منشور (للمتابعين) =====
+// أضف هذا في نهاية دالة addPost (بعد savePost)
+// داخل دالة savePost، بعد db.collection("posts").add
+// أضف هذا الكود:
+
+/*
+// بعد إضافة المنشور بنجاح
+db.collection("users").doc(uid).get().then(function(userDoc) {
+    let userData = userDoc.data() || {};
+    let followers = userData.followers || [];
+    let userName = userData.name || "مستخدم";
+    
+    followers.forEach(function(followerUid) {
+        sendNotification(followerUid, "new_post", `${userName} نشر منشور جديد`, "/home");
+    });
+});
+*/
