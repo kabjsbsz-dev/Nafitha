@@ -132,19 +132,16 @@
 </head>
 <body>
     <div class="chat-container">
-        <!-- الهيدر -->
         <div class="chat-header" id="chatHeader">
             <button class="back-btn" onclick="window.location='messages.html'">←</button>
             <img id="chatUserImg" src="images/logo.png">
             <span class="chat-name" id="chatUserName">جاري التحميل...</span>
         </div>
 
-        <!-- الرسائل -->
         <div class="chat-messages" id="chatMessages">
             <div class="chat-empty-msg">💬 ابدأ المحادثة</div>
         </div>
 
-        <!-- الإدخال -->
         <div class="chat-input-area">
             <input type="text" id="msgInput" placeholder="اكتب رسالة..." onkeyup="if(event.keyCode==13) sendMessage()">
             <button onclick="sendMessage()">إرسال</button>

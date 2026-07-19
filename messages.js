@@ -30,11 +30,17 @@ function loadConversations() {
                 return;
             }
 
+            let conversations = [];
             snapshot.forEach(function(doc) {
                 let conv = doc.data();
+                conv.id = doc.id;
+                conversations.push(conv);
+            });
+
+            let loaded = 0;
+            conversations.forEach(function(conv) {
                 let otherUid = conv.participants.find(function(p) { return p !== uid; });
 
-                // جلب معلومات المستخدم الآخر
                 db.collection("users").doc(otherUid).get()
                     .then(function(userDoc) {
                         if (!userDoc.exists) return;
@@ -55,7 +61,10 @@ function loadConversations() {
                         </div>
                         `;
 
-                        document.getElementById("chatList").innerHTML = html;
+                        loaded++;
+                        if (loaded === conversations.length) {
+                            document.getElementById("chatList").innerHTML = html;
+                        }
                     });
             });
         })

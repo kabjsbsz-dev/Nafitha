@@ -1,5 +1,5 @@
 // =============================================
-// ===== الملف الشخصي - نسخة معدلة =====
+// ===== الملف الشخصي - الجزء 1 =====
 // =============================================
 
 auth.onAuthStateChanged(function(user) {
@@ -17,43 +17,36 @@ auth.onAuthStateChanged(function(user) {
 function loadProfile(uid) {
     if (!uid) return;
 
-    // ===== تحميل بيانات المستخدم =====
+    document.getElementById("userName").innerText = "جاري التحميل...";
+    document.getElementById("userBio").innerText = "⏳";
+    document.getElementById("userCity").innerText = "📍 جاري التحميل";
+
     db.collection("users").doc(uid).get()
         .then(function(doc) {
             if (!doc.exists) {
-                document.getElementById("userName").innerText = "مستخدم غير موجود";
+                document.getElementById("userName").innerText = "مستخدم غير مسجل";
+                document.getElementById("userBio").innerText = "ليس لديك حساب كامل";
+                document.getElementById("userCity").innerText = "📍 غير محدد";
                 return;
             }
 
             let data = doc.data();
-            console.log("✅ بيانات المستخدم:", data);
-
-            // عرض الاسم
             document.getElementById("userName").innerText = data.name || data.owner || "مستخدم";
-
-            // عرض السيرة
             document.getElementById("userBio").innerText = data.bio || "مرحباً! أنا على نافذة";
-
-            // عرض المدينة
             document.getElementById("userCity").innerText = "📍 " + (data.city || "غير محدد");
 
-            // عرض صورة البروفايل
             if (data.image || data.profileImage) {
                 document.getElementById("profileImage").src = data.image || data.profileImage;
             }
-
-            // عرض صورة الغلاف
             if (data.cover) {
                 document.getElementById("coverImage").src = data.cover;
             }
 
-            // عرض المتابعين والمتابعات
             let followers = data.followers || [];
             let following = data.following || [];
             document.getElementById("followersCount").innerText = followers.length;
             document.getElementById("followingCount").innerText = following.length;
 
-            // زر المتابعة
             let currentUser = auth.currentUser;
             let followBtn = document.getElementById("followBtn");
 
@@ -71,15 +64,45 @@ function loadProfile(uid) {
             } else {
                 followBtn.style.display = "none";
             }
+
+            // ===== زر المراسلة (فقط للمستخدمين الآخرين) =====
+            if (uid !== currentUser.uid) {
+                let oldChatBtn = document.getElementById("chatBtn");
+                if (oldChatBtn) oldChatBtn.remove();
+
+                let chatBtn = document.createElement("button");
+                chatBtn.id = "chatBtn";
+                chatBtn.innerHTML = "💬 مراسلة";
+                chatBtn.style.background = "rgba(255,215,0,0.15)";
+                chatBtn.style.border = "1px solid #FFD700";
+                chatBtn.style.borderRadius = "50px";
+                chatBtn.style.padding = "10px 20px";
+                chatBtn.style.color = "#FFD700";
+                chatBtn.style.cursor = "pointer";
+                chatBtn.style.fontSize = "14px";
+                chatBtn.style.fontWeight = "bold";
+                chatBtn.onclick = function() {
+                    window.location.href = "chat.html?uid=" + uid;
+                };
+
+                let buttonsContainer = document.querySelector(".profile-buttons");
+                if (buttonsContainer) {
+                    buttonsContainer.appendChild(chatBtn);
+                }
+            }
+
         })
         .catch(function(err) {
-            console.error("❌ خطأ بتحميل المستخدم:", err);
+            console.error("خطأ:", err);
             document.getElementById("userName").innerText = "خطأ في التحميل";
         });
 
-    // ===== تحميل منشورات المستخدم =====
     loadUserPosts(uid);
 }
+// =============================================
+// ===== الملف الشخصي - الجزء 2 =====
+// =============================================
+
 function loadUserPosts(uid) {
     if (!uid) {
         let urlParams = new URLSearchParams(window.location.search);
@@ -94,7 +117,7 @@ function loadUserPosts(uid) {
 
             let html = "";
             if (snapshot.empty) {
-                html = "<div class='post'><div class='post-body'><p style='text-align:center;color:rgba(255,255,255,0.5);padding:30px;'>📭 لا توجد منشورات</p></div></div>";
+                html = `<div class="post"><div class="post-body"><p style="text-align:center;color:rgba(255,255,255,0.4);padding:30px;">📭 لا توجد منشورات</p></div></div>`;
                 document.getElementById("userPosts").innerHTML = html;
                 return;
             }
@@ -115,15 +138,6 @@ function loadUserPosts(uid) {
                 if (post.image) {
                     imagesHtml = `<img src="${post.image}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;cursor:pointer;margin-top:8px;" onclick="openImage('${post.image}')">`;
                 }
-                if (post.images && post.images.length > 0) {
-                    imagesHtml = `
-                    <div style="display:flex;overflow-x:auto;gap:8px;padding:8px 0;margin-top:8px;">
-                        ${post.images.map(img => `
-                            <img src="${img}" style="min-width:150px;height:150px;object-fit:cover;border-radius:12px;cursor:pointer;" onclick="openImage('${img}')">
-                        `).join('')}
-                    </div>
-                    `;
-                }
 
                 html += `
                 <div class="post">
@@ -134,7 +148,7 @@ function loadUserPosts(uid) {
                         ${post.price ? `<div class="post-price">💰 ${post.price} د.ع</div>` : ''}
                         ${imagesHtml}
                         <div class="post-stats" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
-                            <span>👁️ ${post.views || 0}</span>
+                            <span>👁️ ${post.views || 0} مشاهدات</span>
                             <span>💬 ${post.comments || 0}</span>
                             <span>👍 ${post.likes || 0}</span>
                         </div>
@@ -146,16 +160,86 @@ function loadUserPosts(uid) {
             document.getElementById("userPosts").innerHTML = html;
         })
         .catch(function(err) {
-            console.error("❌ خطأ بتحميل المنشورات:", err);
+            console.error("خطأ:", err);
             document.getElementById("userPosts").innerHTML = 
                 `<div class="post"><div class="post-body"><p style="text-align:center;color:#ff6b6b;padding:30px;">❌ حدث خطأ أثناء تحميل المنشورات</p></div></div>`;
         });
 }
 
-// ===== دوال إضافية (الصور، المفضلة، متابعة، إلخ) =====
-// ... (نفس الدوال السابقة موجودة هنا)
-// لكن اختصاراً: إذا كانت الدوال موجودة بالفعل، استخدمها.
-// سأضيف الدوال الأساسية فقط:
+function loadUserPhotos() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let uid = urlParams.get("uid") || auth.currentUser.uid;
+
+    db.collection("posts")
+        .where("uid", "==", uid)
+        .get()
+        .then(function(snapshot) {
+            let html = "<div style='display:flex;flex-wrap:wrap;gap:10px;padding:20px;'>";
+            let count = 0;
+
+            snapshot.forEach(function(doc) {
+                let post = doc.data();
+                if (post.image) {
+                    html += `
+                    <img src="${post.image}" style="width:120px;height:120px;object-fit:cover;border-radius:12px;cursor:pointer;" onclick="openImage('${post.image}')">
+                    `;
+                    count++;
+                }
+            });
+
+            html += "</div>";
+            if (count === 0) {
+                html = "<p style='text-align:center;color:rgba(255,255,255,0.4);padding:30px;'>📷 لا توجد صور</p>";
+            }
+
+            document.getElementById("userPosts").innerHTML = html;
+        });
+}
+
+function loadUserFavorites() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let uid = urlParams.get("uid") || auth.currentUser.uid;
+
+    db.collection("users").doc(uid).get().then(function(doc) {
+        let data = doc.data() || {};
+        let favs = data.favoritesList || [];
+
+        if (favs.length === 0) {
+            document.getElementById("userPosts").innerHTML = 
+                "<p style='text-align:center;color:rgba(255,255,255,0.4);padding:30px;'>⭐ لا توجد مفضلات</p>";
+            return;
+        }
+
+        let html = "";
+        let count = 0;
+
+        favs.forEach(function(postId) {
+            db.collection("posts").doc(postId).get().then(function(postDoc) {
+                if (postDoc.exists) {
+                    let p = postDoc.data();
+                    html += `
+                    <div class="post">
+                        <div class="post-body">
+                            ${p.factory ? `<div class="post-title">🏭 ${p.factory}</div>` : ''}
+                            ${p.product ? `<div class="post-product">📦 ${p.product}</div>` : ''}
+                            <div class="post-description">${p.description || ''}</div>
+                            ${p.price ? `<div class="post-price">💰 ${p.price} د.ع</div>` : ''}
+                        </div>
+                    </div>
+                    `;
+                }
+                count++;
+                if (count === favs.length) {
+                    document.getElementById("userPosts").innerHTML = 
+                        html || "<p style='text-align:center;color:rgba(255,255,255,0.4);padding:30px;'>⭐ لا توجد مفضلات</p>";
+                }
+            });
+        });
+    });
+}
+// =============================================
+// ===== الملف الشخصي - الجزء 3 =====
+// =============================================
 
 function openImage(src) {
     let viewer = document.createElement("div");
@@ -171,22 +255,76 @@ function openImage(src) {
     };
 }
 
+document.getElementById("profileUpload").onchange = function() {
+    if (!auth.currentUser) return;
+    let file = this.files[0];
+    if (!file) return;
+
+    let formData = new FormData();
+    formData.append("image", file);
+
+    fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
+        method: "POST",
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            let image = data.data.url;
+            db.collection("users").doc(auth.currentUser.uid).update({
+                image: image,
+                profileImage: image
+            }).then(function() {
+                document.getElementById("profileImage").src = image;
+            });
+        } else {
+            alert("فشل رفع الصورة");
+        }
+    })
+    .catch(function() {
+        alert("حدث خطأ أثناء رفع الصورة");
+    });
+};
+
+function changeCover() {
+    if (!auth.currentUser) return;
+    let input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = function() {
+        let file = this.files[0];
+        if (!file) return;
+
+        let formData = new FormData();
+        formData.append("image", file);
+
+        fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
+            method: "POST",
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                let url = data.data.url;
+                db.collection("users").doc(auth.currentUser.uid).update({ cover: url })
+                    .then(function() {
+                        document.getElementById("coverImage").src = url;
+                    });
+            } else {
+                alert("فشل رفع الصورة");
+            }
+        })
+        .catch(function() {
+            alert("حدث خطأ");
+        });
+    };
+    input.click();
+}
+
 function editProfile() {
     window.location.href = "profile.html";
 }
 
-function logout() {
-    if (confirm("هل تريد تسجيل الخروج؟")) {
-        firebase.auth().signOut().then(function() {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }).catch(function(error) {
-            alert("خطأ: " + error.message);
-        });
-    }
-}
-
-// دوال التبديل بين الأقسام
 function switchTab(tab) {
     document.querySelectorAll(".profile-tabs .tab").forEach(function(el) {
         el.classList.remove("active");
@@ -204,25 +342,8 @@ function switchTab(tab) {
     }
 }
 
-function loadUserPhotos() {
-    // ... (نفس الكود السابق)
-    alert("سيتم إضافة الصور قريباً");
-}
-
-function loadUserFavorites() {
-    // ... (نفس الكود السابق)
-    alert("سيتم إضافة المفضلة قريباً");
-}
-
-// =============================================
-// ===== نظام المتابعة (كامل) =====
-// =============================================
-
 function toggleFollow() {
-    if (!auth.currentUser) {
-        alert("يرجى تسجيل الدخول");
-        return;
-    }
+    if (!auth.currentUser) { alert("يرجى تسجيل الدخول"); return; }
 
     let btn = document.getElementById("followBtn");
     let urlParams = new URLSearchParams(window.location.search);
@@ -246,21 +367,17 @@ function followUser(targetUid) {
     let uid = auth.currentUser.uid;
     if (uid === targetUid) return;
 
-    // إضافة المستخدم إلى قائمة المتابعين
     db.collection("users").doc(targetUid).update({
         followers: firebase.firestore.FieldValue.arrayUnion(uid)
     });
 
-    // إضافة إلى قائمة من تتابعهم
     db.collection("users").doc(uid).update({
         following: firebase.firestore.FieldValue.arrayUnion(targetUid)
     }).then(function() {
-        // إرسال إشعار
         db.collection("users").doc(uid).get().then(function(userDoc) {
             let name = userDoc.data()?.name || "مستخدم";
             sendNotification(targetUid, "follow", `${name} بدأ متابعتك`, "/profile?uid=" + uid);
         });
-        // تحديث عدد المتابعين
         updateFollowCounts(targetUid);
     });
 }
@@ -290,10 +407,6 @@ function updateFollowCounts(uid) {
     });
 }
 
-// =============================================
-// ===== عرض المتابعين والمتابعات =====
-// =============================================
-
 function showFollowers() {
     let urlParams = new URLSearchParams(window.location.search);
     let uid = urlParams.get("uid") || auth.currentUser.uid;
@@ -308,7 +421,6 @@ function showFollowers() {
             return;
         }
 
-        // جلب أسماء المتابعين
         let count = 0;
         followers.forEach(function(followerUid) {
             db.collection("users").doc(followerUid).get().then(function(userDoc) {
@@ -355,106 +467,13 @@ function showFollowing() {
     });
 }
 
-// =============================================
-// ===== تغيير الغلاف =====
-// =============================================
-
-function changeCover() {
-    if (!auth.currentUser) {
-        alert("يرجى تسجيل الدخول");
-        return;
-    }
-
-    let input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = function() {
-        let file = this.files[0];
-        if (!file) return;
-
-        let formData = new FormData();
-        formData.append("image", file);
-
-        fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
-            method: "POST",
-            body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                let url = data.data.url;
-                db.collection("users").doc(auth.currentUser.uid).update({ cover: url })
-                    .then(function() {
-                        document.getElementById("coverImage").src = url;
-                        alert("✅ تم تغيير الغلاف");
-                    });
-            } else {
-                alert("فشل رفع الصورة");
-            }
-        })
-        .catch(function() {
-            alert("حدث خطأ");
+function logout() {
+    if (confirm("هل تريد تسجيل الخروج؟")) {
+        firebase.auth().signOut().then(function() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }).catch(function(error) {
+            alert("خطأ: " + error.message);
         });
-    };
-    input.click();
-}
-
-// =============================================
-// ===== تغيير صورة البروفايل =====
-// =============================================
-
-document.getElementById("profileUpload").onchange = function() {
-    if (!auth.currentUser) {
-        alert("يرجى تسجيل الدخول");
-        return;
     }
-
-    let file = this.files[0];
-    if (!file) return;
-
-    let formData = new FormData();
-    formData.append("image", file);
-
-    fetch("https://api.imgbb.com/1/upload?key=b7c1924307a10aed4942a02aff73e3cb", {
-        method: "POST",
-        body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            let image = data.data.url;
-            db.collection("users").doc(auth.currentUser.uid).update({
-                image: image,
-                profileImage: image
-            }).then(function() {
-                document.getElementById("profileImage").src = image;
-                alert("✅ تم تغيير صورة الحساب");
-            });
-        } else {
-            alert("فشل رفع الصورة");
-        }
-    })
-    .catch(function() {
-        alert("حدث خطأ أثناء رفع الصورة");
-    });
-};
-
-function showFollowers() {
-    alert("سيتم عرض المتابعين قريباً");
-}
-
-function showFollowing() {
-    alert("سيتم عرض المتابعات قريباً");
-}
-
-function changeCover() {
-    alert("سيتم تغيير الغلاف قريباً");
-}
-
-document.getElementById("profileUpload").onchange = function() {
-    alert("سيتم رفع الصورة قريباً");
-};
-// ===== بدء محادثة =====
-function startChat(targetUid) {
-    window.location.href = "chat.html?uid=" + targetUid;
 }

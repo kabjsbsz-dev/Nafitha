@@ -41,7 +41,6 @@ function loadChatUser() {
 function getOrCreateConversation() {
     let uid = auth.currentUser.uid;
 
-    // البحث عن محادثة موجودة
     db.collection("conversations")
         .where("participants", "array-contains", uid)
         .get()
@@ -57,7 +56,6 @@ function getOrCreateConversation() {
             });
 
             if (!found) {
-                // إنشاء محادثة جديدة
                 db.collection("conversations").add({
                     participants: [uid, otherUid],
                     lastMessage: "",
@@ -78,7 +76,6 @@ function getOrCreateConversation() {
 }
 
 function loadMessages(convId) {
-    // عرض رسالة تحميل
     document.getElementById("chatMessages").innerHTML = 
         `<div class="chat-empty-msg">⏳ جاري التحميل...</div>`;
 
@@ -109,7 +106,6 @@ function loadMessages(convId) {
             });
 
             document.getElementById("chatMessages").innerHTML = html;
-            // التمرير للأسفل
             let container = document.getElementById("chatMessages");
             container.scrollTop = container.scrollHeight;
         });
@@ -127,7 +123,6 @@ function sendMessage() {
 
     let uid = auth.currentUser.uid;
 
-    // إضافة الرسالة
     db.collection("conversations")
         .doc(conversationId)
         .collection("messages")
@@ -137,7 +132,6 @@ function sendMessage() {
             time: Date.now()
         })
         .then(function() {
-            // تحديث آخر رسالة في المحادثة
             db.collection("conversations")
                 .doc(conversationId)
                 .update({
