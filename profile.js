@@ -1,5 +1,5 @@
 // =============================================
-// ===== الملف الشخصي - الجزء 1 =====
+// ===== profile.js - الجزء 1 من 2 =====
 // =============================================
 
 auth.onAuthStateChanged(function(user) {
@@ -65,7 +65,7 @@ function loadProfile(uid) {
                 followBtn.style.display = "none";
             }
 
-            // ===== زر المراسلة (فقط للمستخدمين الآخرين) =====
+            // ===== زر المراسلة =====
             if (uid !== currentUser.uid) {
                 let oldChatBtn = document.getElementById("chatBtn");
                 if (oldChatBtn) oldChatBtn.remove();
@@ -100,7 +100,7 @@ function loadProfile(uid) {
     loadUserPosts(uid);
 }
 // =============================================
-// ===== الملف الشخصي - الجزء 2 =====
+// ===== profile.js - الجزء 2 من 2 =====
 // =============================================
 
 function loadUserPosts(uid) {
@@ -135,8 +135,26 @@ function loadUserPosts(uid) {
 
             posts.forEach(function(post) {
                 let imagesHtml = "";
+                if (post.images && post.images.length > 0) {
+                    imagesHtml = `
+                    <div style="display:flex;overflow-x:auto;gap:8px;padding:8px 0;">
+                        ${post.images.map(img => `
+                            <img src="${img}" style="min-width:150px;height:150px;object-fit:cover;border-radius:12px;cursor:pointer;" onclick="openImage('${img}')">
+                        `).join('')}
+                    </div>
+                    `;
+                }
                 if (post.image) {
                     imagesHtml = `<img src="${post.image}" style="width:100%;max-height:300px;object-fit:cover;border-radius:12px;cursor:pointer;margin-top:8px;" onclick="openImage('${post.image}')">`;
+                }
+
+                let videoHtml = "";
+                if (post.video) {
+                    videoHtml = `
+                    <video controls style="width:100%;max-height:300px;border-radius:12px;margin-top:8px;">
+                        <source src="${post.video}">
+                    </video>
+                    `;
                 }
 
                 html += `
@@ -147,6 +165,7 @@ function loadUserPosts(uid) {
                         <div class="post-description">${post.description || ''}</div>
                         ${post.price ? `<div class="post-price">💰 ${post.price} د.ع</div>` : ''}
                         ${imagesHtml}
+                        ${videoHtml}
                         <div class="post-stats" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
                             <span>👁️ ${post.views || 0} مشاهدات</span>
                             <span>💬 ${post.comments || 0}</span>
@@ -179,6 +198,14 @@ function loadUserPhotos() {
 
             snapshot.forEach(function(doc) {
                 let post = doc.data();
+                if (post.images && post.images.length > 0) {
+                    post.images.forEach(function(img) {
+                        html += `
+                        <img src="${img}" style="width:120px;height:120px;object-fit:cover;border-radius:12px;cursor:pointer;" onclick="openImage('${img}')">
+                        `;
+                        count++;
+                    });
+                }
                 if (post.image) {
                     html += `
                     <img src="${post.image}" style="width:120px;height:120px;object-fit:cover;border-radius:12px;cursor:pointer;" onclick="openImage('${post.image}')">
@@ -237,9 +264,6 @@ function loadUserFavorites() {
         });
     });
 }
-// =============================================
-// ===== الملف الشخصي - الجزء 3 =====
-// =============================================
 
 function openImage(src) {
     let viewer = document.createElement("div");

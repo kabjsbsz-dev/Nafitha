@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -12,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-storage-compat.js"></script>
     <script src="firebase.js"></script>
 </head>
-
 <body>
     <header class="topbar">
         <div class="logo">
@@ -20,9 +18,10 @@
             <span>نافذة</span>
         </div>
         <div class="top-right">
-    <button onclick="window.location='notifications.html'">🔔</button>
-    <button onclick="window.location='profile.html'">👤</button>
-</div>
+            <button onclick="window.location='messages.html'">💬</button>
+            <button onclick="window.location='notifications.html'">🔔</button>
+            <button onclick="window.location='profile.html'">👤</button>
+        </div>
     </header>
 
     <div class="search-box">
@@ -44,9 +43,9 @@
     </div>
 
     <div id="usersResults"></div>
-
     <div id="posts"></div>
-        <div class="popup" id="popup">
+
+    <div class="popup" id="popup">
         <div class="facebook-post">
             <div class="post-top">
                 <button class="close-post" onclick="closeForm()">✕</button>
@@ -82,38 +81,53 @@
                 <input id="price" placeholder="السعر (دينار)" style="width:100%;padding:12px;border:1px solid #444;border-radius:10px;background:#2a2a2a;color:#fff;margin-bottom:8px;">
             </div>
 
-            <input type="file" id="image" accept="image/*" style="display:none;">
+            <input type="file" id="images" accept="image/*" multiple style="display:none;">
+            <div id="imagePreview" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px;"></div>
+            <input type="file" id="videoInput" accept="video/*" style="display:none;">
 
             <div class="publish-tools">
-                <button onclick="document.getElementById('image').click()">🖼️ صورة</button>
+                <button onclick="document.getElementById('images').click()">🖼️ صور</button>
+                <button onclick="document.getElementById('videoInput').click()">🎬 فيديو</button>
                 <button onclick="toggleProductFields()">🏷️ إضافة منتج</button>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-      <button onclick="window.location='messages.html'">💬</button>
-    <button onclick="window.location='home.html'">🏠</button>
-    <button onclick="showForm()">➕</button>
-    <button onclick="window.location='notifications.html'">🔔</button>
-    <button onclick="window.location='profile.html'">👤</button>
-</nav>
+        <button onclick="window.location='home.html'">🏠</button>
+        <button onclick="showForm()">➕</button>
+        <button onclick="window.location='messages.html'">💬</button>
+        <button onclick="window.location='notifications.html'">🔔</button>
+        <button onclick="window.location='profile.html'">👤</button>
+    </nav>
 
     <script src="app.js"></script>
-    
-    <style>
-    /* أنيميشن للبطاقات عند التحميل */
-    .post {
-        animation: fadeInUp 0.6s ease-out forwards;
-        opacity: 0;
-    }
-    .post:nth-child(1) { animation-delay: 0.1s; }
-    .post:nth-child(2) { animation-delay: 0.2s; }
-    .post:nth-child(3) { animation-delay: 0.3s; }
-    .post:nth-child(4) { animation-delay: 0.4s; }
-    .post:nth-child(5) { animation-delay: 0.5s; }
-</style>
+    <script>
+        document.getElementById("images").addEventListener("change", function() {
+            let preview = document.getElementById("imagePreview");
+            preview.innerHTML = "";
+            let files = this.files;
+            for (let i = 0; i < files.length && i < 5; i++) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    let img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.width = "80px";
+                    img.style.height = "80px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "10px";
+                    img.style.border = "2px solid #FFD700";
+                    img.style.margin = "4px";
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        });
 
+        function searchCategory(cat) {
+            document.getElementById("search").value = cat;
+            filterByCategory(cat);
+        }
+    </script>
 </body>
-
 </html>

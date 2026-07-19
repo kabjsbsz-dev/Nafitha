@@ -34,7 +34,8 @@ function loadChatUser() {
             }
         })
         .catch(function(err) {
-            console.error("خطأ:", err);
+            console.error("خطأ في تحميل المستخدم:", err);
+            document.getElementById("chatUserName").innerText = "خطأ في التحميل";
         });
 }
 
@@ -67,11 +68,15 @@ function getOrCreateConversation() {
                 })
                 .catch(function(err) {
                     console.error("خطأ في إنشاء المحادثة:", err);
+                    document.getElementById("chatMessages").innerHTML = 
+                        `<div class="chat-empty-msg">⚠️ حدث خطأ في إنشاء المحادثة</div>`;
                 });
             }
         })
         .catch(function(err) {
-            console.error("خطأ:", err);
+            console.error("خطأ في البحث عن المحادثة:", err);
+            document.getElementById("chatMessages").innerHTML = 
+                `<div class="chat-empty-msg">⚠️ حدث خطأ</div>`;
         });
 }
 

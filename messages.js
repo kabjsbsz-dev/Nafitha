@@ -19,12 +19,15 @@ function loadConversations() {
         .get()
         .then(function(snapshot) {
             let html = "";
+            
             if (snapshot.empty) {
                 html = `
                 <div class="chat-empty">
                     <span>💬</span>
                     لا توجد محادثات<br>
-                    <span style="font-size:14px;">ابحث عن مستخدم وابدأ محادثة</span>
+                    <span style="font-size:14px;color:#aaa;">
+                        اذهب إلى بروفايل أي مستخدم واضغط "مراسلة"
+                    </span>
                 </div>`;
                 document.getElementById("chatList").innerHTML = html;
                 return;
@@ -38,6 +41,8 @@ function loadConversations() {
             });
 
             let loaded = 0;
+            let htmlParts = [];
+
             conversations.forEach(function(conv) {
                 let otherUid = conv.participants.find(function(p) { return p !== uid; });
 
@@ -50,7 +55,7 @@ function loadConversations() {
                         let lastMsg = conv.lastMessage || "ابدأ المحادثة";
                         let timeText = conv.lastTime ? getTimeText(conv.lastTime) : "";
 
-                        html += `
+                        htmlParts.push(`
                         <div class="chat-item" onclick="openChat('${otherUid}')">
                             <img src="${image}" onerror="this.src='images/logo.png'">
                             <div class="chat-info">
@@ -59,17 +64,30 @@ function loadConversations() {
                             </div>
                             <div class="chat-time">${timeText}</div>
                         </div>
-                        `;
+                        `);
 
                         loaded++;
                         if (loaded === conversations.length) {
-                            document.getElementById("chatList").innerHTML = html;
+                            document.getElementById("chatList").innerHTML = htmlParts.join('');
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error("خطأ في جلب بيانات المستخدم:", err);
+                        loaded++;
+                        if (loaded === conversations.length) {
+                            document.getElementById("chatList").innerHTML = htmlParts.join('');
                         }
                     });
             });
         })
         .catch(function(err) {
-            console.error("خطأ:", err);
+            console.error("خطأ في تحميل المحادثات:", err);
+            document.getElementById("chatList").innerHTML = `
+                <div class="chat-empty">
+                    <span>⚠️</span>
+                    حدث خطأ في تحميل المحادثات<br>
+                    <span style="font-size:14px;color:#aaa;">${err.message}</span>
+                </div>`;
         });
 }
 
